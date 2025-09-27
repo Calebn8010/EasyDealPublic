@@ -48,7 +48,7 @@ namespace EasyDeal.Server.Controllers
             */
         }
 
-        public bool AddToWishlist(GameDeal gameDeal, string userid)
+        private bool AddToWishlist(GameDeal gameDeal, string userid)
         {
             _logger.LogInformation($"Game deal to add: {gameDeal.external}");
             // Implement logic to add the game deal to the wishlist
