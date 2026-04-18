@@ -1,10 +1,9 @@
 {
-  {
-    "routes": [
-      {
-        "route": "/api/*",
-        "rewrite": "neweasydeal-aeddbjd9ascabra3.westus3-01.azurewebsites.net/api/*"
-      }
-    ]
-  }
+  "routes": [
+    {
+      "route": "/api/*",
+      "redirect": "neweasydeal-aeddbjd9ascabra3.westus3-01.azurewebsites.net/api/*",
+      "statusCode": 200
+    }
+  ]
 }
