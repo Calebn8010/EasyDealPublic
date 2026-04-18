@@ -62,7 +62,7 @@ function Register() {
                 .catch((error) => {
                     // handle network error
                     console.error(error);
-                    setError("Error registering.");
+                    setError("Network Error registering.");
                 });
         }
     };
