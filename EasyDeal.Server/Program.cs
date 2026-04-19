@@ -9,6 +9,7 @@ namespace EasyDeal.Server.Data
     {
         public static void Main(string[] args)
         {
+            
 
             var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,13 @@ namespace EasyDeal.Server.Data
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
+
+            // Auto apply db migrations
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                db.Database.Migrate();
+            }
 
             app.UseDefaultFiles();
             app.UseStaticFiles();
@@ -66,12 +74,7 @@ namespace EasyDeal.Server.Data
 
             app.MapFallbackToFile("/index.html");
 
-            // Auto apply db migrations
-            using (var scope = app.Services.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                db.Database.Migrate();
-            }
+            
 
             app.Run();
         }
