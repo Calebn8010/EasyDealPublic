@@ -187,7 +187,7 @@ function Home() {
 
             {/* Main search (offset for fixed navbar) */}
             <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100" style={{ paddingTop: '64px' }}>
-                <h4>Search for PC games to add into your EasyDeal list</h4>
+                <h4>Search for Steam games to add into your EasyDeal Wishlist</h4>
                 <SearchForm onSearch={handleSearch} />
                 <ul className="list">
                     {deals.map((deal, idx) => (
