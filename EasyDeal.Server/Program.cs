@@ -33,13 +33,6 @@ namespace EasyDeal.Server.Data
 
             var app = builder.Build();
 
-            // Auto apply db migrations
-            using (var scope = app.Services.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                db.Database.Migrate();
-            }
-
             app.UseDefaultFiles();
             app.UseStaticFiles();
             app.MapIdentityApi<ApplicationUser>();
