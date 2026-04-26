@@ -48,6 +48,39 @@ namespace EasyDeal.Server.Controllers
             */
         }
 
+        // Handles GET request from front end to fetch user's wishlist
+        [HttpGet]
+        public async Task<IActionResult> Get()
+        {
+            _logger.LogInformation("WishlistUpdatesController Get method called.");
+
+            // Get logged in user id
+            string? userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("No user is logged in.");
+                return Unauthorized(new { message = "User is not logged in." });
+            }
+
+            _logger.LogInformation($"Fetching wishlist for user id: {userId}");
+
+            List<Wishlist> wishlist = await _context.Wishlists
+                .Where(w => w.UserId == userId && !w.IsDeleted)
+                .OrderByDescending(w => w.DateAdded)
+                .ToListAsync();
+
+            // Map to a DTO that matches what the frontend expects
+            var result = wishlist.Select(w => new
+            {
+                external = w.GameName,
+                gameID = w.GameId,
+                dateAdded = w.DateAdded
+            });
+
+            return Ok(result);
+        }
+
+
         private bool AddToWishlist(GameDeal gameDeal, string userid)
         {
             _logger.LogInformation($"Game deal to add: {gameDeal.external}");
