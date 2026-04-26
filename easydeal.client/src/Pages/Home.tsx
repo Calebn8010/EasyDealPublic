@@ -7,10 +7,12 @@ function Home() {
     const [deals, setDeals] = useState<any[]>([]);
     const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
     const [dealInfo, setInfo] = useState<any | null>(null);
+    const [showWishlist, setShowWishlist] = useState(false);
+    const [wishlistItems, setWishlistItems] = useState<any[]>([]);
+    const [wishlistLoading, setWishlistLoading] = useState(false);
 
     async function handleSearch(query: string) {
-        setExpandedIdx(null); //clear best deal if search /toggle has already been used
-        console.log({ query })
+        setExpandedIdx(null);
         const response = await fetch('dealsearch', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -18,69 +20,44 @@ function Home() {
         });
         const data = await response.json();
         setDeals(Array.isArray(data) ? data : []);
-        //console.log(data);
-        //console.log(typeof data);
-        //const arrayData = Array.isArray(data) ? data : Object.values(data);
-        //setDeals(arrayData);
-        //console.log(arrayData);
-        //console.log(typeof arrayData);
     }
 
-    async function handleAdd(deal: object) { //instead of object - add interface in future
-        console.log("Add clicked for:", deal);
-        console.log(JSON.stringify(deal));
-        console.log(JSON.stringify({ deal }));
+    function showNotification(message: string, color: string, duration: number) {
+        const notification = document.createElement('div');
+        notification.textContent = message;
+        Object.assign(notification.style, {
+            position: 'fixed',
+            top: '70px', // below the navbar
+            right: '20px',
+            backgroundColor: color,
+            color: 'white',
+            padding: '12px 24px',
+            borderRadius: '8px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            zIndex: '9999',
+            maxWidth: '90vw',
+        });
+        document.body.appendChild(notification);
+        setTimeout(() => document.body.removeChild(notification), duration);
+    }
+
+    async function handleAdd(deal: object) {
         const response = await fetch('wishlistupdates', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(deal)
         });
 
-        // Show a green success notification
-        const notification = document.createElement('div');
-        notification.textContent = 'Added! Stay tuned for new Wishlist features page';
-        notification.style.position = 'fixed';
-        notification.style.top = '20px';
-        notification.style.right = '20px';
-        notification.style.backgroundColor = '#22c55e';
-        notification.style.color = 'white';
-        notification.style.padding = '12px 24px';
-        notification.style.borderRadius = '8px';
-        notification.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
-        notification.style.zIndex = '9999';
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            document.body.removeChild(notification);
-        }, 3500);
-
-        if (response.status == 409) {
-            // Show a green success notification
-            const notification = document.createElement('div');
-            notification.textContent = 'Game is already added for your user account. Stay tuned for new Wishlist features page!';
-            notification.style.position = 'fixed';
-            notification.style.top = '20px';
-            notification.style.right = '20px';
-            notification.style.backgroundColor = '#facc15';
-            notification.style.color = 'white';
-            notification.style.padding = '12px 24px';
-            notification.style.borderRadius = '8px';
-            notification.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
-            notification.style.zIndex = '9999';
-            document.body.appendChild(notification);
-
-            setTimeout(() => {
-                document.body.removeChild(notification);
-            }, 6000);
+        if (response.status === 409) {
+            showNotification('Game is already in your Wishlist!', '#facc15', 6000);
+        } else {
+            showNotification('Added to Wishlist! ✓', '#22c55e', 3500);
         }
-
-        console.log(response);
-        
     }
 
     async function toggleExpand(idx: number, gameID: string) {
         setExpandedIdx(expandedIdx === idx ? null : idx);
-        setInfo(null); //clear previous info to trigger "Loading..."
+        setInfo(null);
 
         const response = await fetch('bestdealinfo', {
             method: 'POST',
@@ -91,18 +68,133 @@ function Home() {
         setInfo(data);
     }
 
+    async function handleOpenWishlist() {
+        setShowWishlist(true);
+        setWishlistLoading(true);
+        try {
+            const response = await fetch('wishlistupdates', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+            });
+            const data = await response.json();
+            setWishlistItems(Array.isArray(data) ? data : []);
+        } catch {
+            setWishlistItems([]);
+        } finally {
+            setWishlistLoading(false);
+        }
+    }
+
     return (
         <AuthorizeView>
-            <span><LogoutLink>Logout <AuthorizedUser value="email" /></LogoutLink></span>
-            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+            {/* Top navbar */}
+            <div style={{
+                position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '10px 16px',
+                background: '#fff',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.10)',
+            }}>
+                <span style={{ fontSize: '0.875rem', color: '#4b5563' }}>
+                    <LogoutLink>Logout <AuthorizedUser value="email" /></LogoutLink>
+                </span>
+
+                {/* Wishlist Button */}
+                <button
+                    onClick={handleOpenWishlist}
+                    style={{
+                        display: 'flex', alignItems: 'center', gap: '6px',
+                        background: '#4f46e5', color: '#fff',
+                        border: 'none', borderRadius: '999px',
+                        padding: '8px 16px', fontSize: '0.875rem', fontWeight: 600,
+                        cursor: 'pointer', boxShadow: '0 2px 6px rgba(79,70,229,0.4)',
+                        transition: 'background 0.15s',
+                        whiteSpace: 'nowrap',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = '#4338ca')}
+                    onMouseLeave={e => (e.currentTarget.style.background = '#4f46e5')}
+                >
+                    {/* Heart icon */}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    </svg>
+                    Wishlist
+                </button>
+            </div>
+
+            {/* Wishlist slide-in panel */}
+            {showWishlist && (
+                <div style={{
+                    position: 'fixed', inset: 0, zIndex: 200,
+                    display: 'flex', justifyContent: 'flex-end',
+                }}>
+                    {/* Backdrop */}
+                    <div
+                        onClick={() => setShowWishlist(false)}
+                        style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)' }}
+                    />
+                    {/* Panel */}
+                    <div style={{
+                        position: 'relative', zIndex: 1,
+                        width: '100%', maxWidth: '500px',
+                        height: '100%', overflowY: 'auto',
+                        background: '#fff',
+                        boxShadow: '-4px 0 24px rgba(0,0,0,0.12)',
+                        padding: '24px 20px',
+                        display: 'flex', flexDirection: 'column', gap: '16px',
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>❤️ My Wishlist</h2>
+                            <button
+                                onClick={() => setShowWishlist(false)}
+                                style={{
+                                    background: 'none', border: 'none', fontSize: '1.5rem',
+                                    cursor: 'pointer', color: '#6b7280', lineHeight: 1,
+                                }}
+                                aria-label="Close wishlist"
+                            >×</button>
+                        </div>
+
+                        {wishlistLoading ? (
+                            <p style={{ color: '#9ca3af' }}>Loading your wishlist…</p>
+                        ) : wishlistItems.length === 0 ? (
+                            <p style={{ color: '#9ca3af' }}>No games in your wishlist yet. Search and add some!</p>
+                        ) : (
+                            <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                {wishlistItems.map((item, i) => (
+                                    <li key={i} style={{
+                                        display: 'flex', alignItems: 'center', gap: '12px',
+                                        background: '#f9fafb', borderRadius: '10px', padding: '10px',
+                                    }}>
+                                        {item.thumb && (
+                                            <img src={item.thumb} alt={item.external} style={{ width: 48, height: 48, borderRadius: 6, objectFit: 'cover' }} />
+                                        )}
+                                        <div>
+                                            <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{item.external ?? item.title ?? 'Game'}</div>
+                                            {item.cheapest && (
+                                                <div style={{ color: '#16a34a', fontSize: '0.8rem', fontWeight: 500 }}>
+                                                    Best: ${item.cheapest}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Main search (offset for fixed navbar) */}
+            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100" style={{ paddingTop: '64px' }}>
                 <h4>Search for PC games to add into your EasyDeal list</h4>
-                <SearchForm onSearch={handleSearch}/>
+                <SearchForm onSearch={handleSearch} />
                 <ul className="list">
                     {deals.map((deal, idx) => (
                         <li key={idx} className="list-item relative">
                             <img className="deal-img" src={deal.thumb} />
                             <span className="list-item-values">{deal.external ?? "Untitled Deal"}</span>
-                
+
                             <div className="actions">
                                 <span
                                     className="list-item-deal"
@@ -124,12 +216,10 @@ function Home() {
                                     style={{ visibility: expandedIdx === idx ? 'hidden' : 'visible' }}
                                 >
                                     {expandedIdx === idx ? '▲' : '▼'}
-
                                 </button>
                             </div>
                             {expandedIdx === idx && (
                                 <div className="extra-info">
-                                    {/* Use dealInfo[deal.gameID] if available, else fallback */}
                                     {dealInfo ? (
                                         <>
                                             <div className="best-deal-ever">
