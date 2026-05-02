@@ -39,9 +39,13 @@ function Home() {
             body: JSON.stringify(deal)
         });
         if (response.status === 409) {
-            showNotification('Game is already in your Wishlist!', '#facc15', 6000);
-        } else {
-            showNotification('Added to Wishlist! ✓', '#22c55e', 3500);
+            showNotification('Game already in your Wishlist ✓', '#facc15', 6000);
+        }
+        else if (response.status == 200) {
+            showNotification('Added to Wishlist ✓', '#22c55e', 3500)
+        }
+        else {
+            showNotification('Add to Wishlist unsuccessful, please try again later.', '#ef4444', 3500);
         }
     }
 
