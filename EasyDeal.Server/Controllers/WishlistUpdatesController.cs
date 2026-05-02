@@ -19,6 +19,13 @@ namespace EasyDeal.Server.Controllers
             _context = context;
         }
 
+        public enum WishlistResult
+        {
+            Success,
+            AlreadyExists,
+            DatabaseError
+        }
+
         // Handles Post request from front end for WishlistUpdates endpoint
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] GameDeal request)
@@ -34,18 +41,16 @@ namespace EasyDeal.Server.Controllers
             }
 
             _logger.LogInformation($"User id: {userId}");
-            AddToWishlist(request, userId);
-            return Ok(new { message = "Wishlist updated successfully." });
-            
-            /*
-            if (AddToWishlist(request, userId))
+
+            WishlistResult status_result = AddToWishlist(request, userId);
+
+            return status_result switch
             {
-                return Ok(new { message = "Wishlist updated successfully." });
-            }
-            
-            else // 409 standard for resource conflicts
-                return StatusCode(409, new { message = "Game is already added into your Wishlist" });
-            */
+                WishlistResult.Success => Ok(),
+                WishlistResult.AlreadyExists => Conflict("Already in wishlist"),
+                WishlistResult.DatabaseError => StatusCode(500, "Failed to save"),
+                _ => BadRequest()
+            };
         }
 
         // Handles GET request from front end to fetch user's wishlist
@@ -81,7 +86,7 @@ namespace EasyDeal.Server.Controllers
         }
 
 
-        private bool AddToWishlist(GameDeal gameDeal, string userid)
+        private WishlistResult AddToWishlist(GameDeal gameDeal, string userid)
         {
             _logger.LogInformation($"Game deal to add: {gameDeal.external}");
             // Implement logic to add the game deal to the wishlist
@@ -93,7 +98,7 @@ namespace EasyDeal.Server.Controllers
             if (inWishlist)
             {
                 _logger.LogInformation($"Game is already in wishlist for this user: {gameDeal.external}");
-                return false;
+                return WishlistResult.AlreadyExists;
             }
 
             //bool in_wishlist = from _context.Wishlists
@@ -109,14 +114,15 @@ namespace EasyDeal.Server.Controllers
 
             _context.Wishlists.Add(wishlistEntry);
             int result = _context.SaveChanges();
-            
+
             if (result == 0)
-            { 
+            {
                 _logger.LogError($"Not able to save changes - check db connection");
-                return false;
+                return WishlistResult.DatabaseError;
             }
             else
-                return result > 0; // returns true if at least one row was affected
+                _logger.LogError($"New wishlist add saved successfully");
+                return result > 0 ? WishlistResult.Success : WishlistResult.DatabaseError; ; // returns true if at least one row was affected
 
 
 
