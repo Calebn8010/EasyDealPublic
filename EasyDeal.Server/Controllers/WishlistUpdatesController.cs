@@ -120,9 +120,9 @@ namespace EasyDeal.Server.Controllers
                 _logger.LogError($"Not able to save changes - check db connection");
                 return WishlistResult.DatabaseError;
             }
-            else
-                _logger.LogError($"New wishlist add saved successfully");
-                return result > 0 ? WishlistResult.Success : WishlistResult.DatabaseError; ; // returns true if at least one row was affected
+
+            _logger.LogInformation($"New wishlist add saved successfully");
+            return WishlistResult.Success; // returns as success if at least one row was affected
 
 
 
