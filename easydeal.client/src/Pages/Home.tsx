@@ -40,11 +40,9 @@ function Home() {
         });
         if (response.status === 409) {
             showNotification('Game already in your Wishlist ✓', '#facc15', 6000);
-        }
-        else if (response.status == 200) {
-            showNotification('Added to Wishlist ✓', '#22c55e', 3500)
-        }
-        else {
+        } else if (response.status === 200) {
+            showNotification('Added to Wishlist ✓', '#22c55e', 3500);
+        } else {
             showNotification('Add to Wishlist unsuccessful, please try again later.', '#ef4444', 3500);
         }
     }
@@ -78,18 +76,57 @@ function Home() {
         }
     }
 
+    async function handleDeleteWishlistItem(item: any, index: number) {
+        try {
+            const response = await fetch('wishlistupdates', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ gameId: item.gameID, external: item.external }),
+            });
+            if (response.ok) {
+                setWishlistItems(prev => prev.filter((_, i) => i !== index));
+                showNotification('Removed from Wishlist', '#64748b', 2500);
+            } else {
+                showNotification('Could not remove item, please try again.', '#ef4444', 3500);
+            }
+        } catch {
+            showNotification('Could not remove item, please try again.', '#ef4444', 3500);
+        }
+    }
+
+    async function handleSetPriceAlert(item: any, index: number, amount: string) {
+        try {
+            const response = await fetch('wishlistpricealert', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    gameId: item.external,
+                    title: item.title,
+                    targetPrice: parseFloat(amount),
+                }),
+            });
+            if (response.ok) {
+                showNotification(`Price alert set at $${amount} for ${item.external ?? item.title}`, '#22c55e', 3500);
+            } else {
+                showNotification('Could not set price alert, please try again.', '#ef4444', 3500);
+            }
+        } catch {
+            showNotification('Could not set price alert, please try again.', '#ef4444', 3500);
+        }
+    }
+
     return (
         <AuthorizeView>
             <Navbar onOpenWishlist={handleOpenWishlist} />
-
             {showWishlist && (
                 <WishlistPanel
                     items={wishlistItems}
                     loading={wishlistLoading}
                     onClose={() => setShowWishlist(false)}
+                    onDelete={handleDeleteWishlistItem}
+                    onSetAlert={handleSetPriceAlert}
                 />
             )}
-
             <MainContent
                 deals={deals}
                 expandedIdx={expandedIdx}
