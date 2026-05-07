@@ -76,7 +76,7 @@ function WishlistPanel({ items, loading, onClose, onDelete, onSetAlert }: Props)
                                     )}
 
                                     <div className="wishlist-item-alert-row">
-                                        <span className="wishlist-alert-label">Alert me at $</span>
+                                        <span className="wishlist-alert-label">Email alert me at $</span>
                                         <input
                                             type="number"
                                             min="0"
