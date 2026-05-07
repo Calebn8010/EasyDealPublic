@@ -53,6 +53,37 @@ namespace EasyDeal.Server.Controllers
             };
         }
 
+        [HttpDelete]
+        public async Task<IActionResult> Delete([FromBody] WishlistItem request)
+        {
+            _logger.LogInformation("WishlistUpdatesController Delete method called.");
+
+            // Get logged in user id 
+            string? userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("No user is logged in.");
+                return Unauthorized(new { message = "User is not logged in." });
+            }
+
+            _logger.LogInformation($"User id: {userId}");
+
+            // Update user's wishlist entry for selected game deal id
+            Wishlist? game_deal = await _context.Wishlists
+                .FirstOrDefaultAsync(w => w.UserId == userId && w.GameId == request.gameID);
+
+            // Return 404 if gamne deal not found in Wishlist db
+            if (game_deal == null)
+                return NotFound("Wishlist entry not found.");
+
+            // Soft delete user game deal requested
+            game_deal.IsDeleted = true;
+            int result = await _context.SaveChangesAsync();
+
+            return result > 0 ? Ok() : StatusCode(500, "Failed to delete.");
+
+        }
+
         // Handles GET request from front end to fetch user's wishlist
         [HttpGet]
         public async Task<IActionResult> Get()
