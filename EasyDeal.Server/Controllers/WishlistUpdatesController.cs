@@ -54,7 +54,7 @@ namespace EasyDeal.Server.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> Delete([FromBody] GameDeal request)
+        public async Task<IActionResult> Delete([FromBody] WishlistItem request)
         {
             _logger.LogInformation("WishlistUpdatesController Delete method called.");
 
