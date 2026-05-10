@@ -84,7 +84,7 @@ function Home() {
                 body: JSON.stringify({ gameId: item.gameID, external: item.external }),
             });
             if (response.ok) {
-                setWishlistItems(prev => prev.filter((_, i) => i !== index));
+                setWishlistItems(prev => prev.filter((_item, i) => i !== index));
                 showNotification('Removed from Wishlist', '#64748b', 2500);
             } else {
                 showNotification('Could not remove item, please try again.', '#ef4444', 3500);
@@ -94,7 +94,7 @@ function Home() {
         }
     }
 
-    async function handleSetPriceAlert(item: any, amount: string) {
+    async function handleSetPriceAlert(item: any, index: number, amount: string) {
         try {
             const response = await fetch('wishlistpricealert', {
                 method: 'POST',
