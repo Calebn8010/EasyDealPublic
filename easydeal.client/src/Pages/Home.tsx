@@ -41,7 +41,7 @@ function Home() {
         if (response.status === 409) {
             showNotification('Game already in your Wishlist ✓', '#facc15', 6000);
         } else if (response.status === 200) {
-            showNotification('Added to Wishlist ✓', '#22c55e', 3500);
+            showNotification(`Added to Wishlist ✓ ${deal?.external}`, '#22c55e', 3500);
         } else {
             showNotification('Add to Wishlist unsuccessful, please try again later.', '#ef4444', 3500);
         }
@@ -84,8 +84,8 @@ function Home() {
                 body: JSON.stringify({ gameId: item.gameID, external: item.external }),
             });
             if (response.ok) {
-                setWishlistItems(prev => prev.filter((_, i) => i !== index));
-                showNotification('Removed from Wishlist', '#64748b', 2500);
+                setWishlistItems(prev => prev.filter((_item, i) => i !== index));
+                showNotification(`Removed from Wishlist: ${item.external}`, '#64748b', 2500);
             } else {
                 showNotification('Could not remove item, please try again.', '#ef4444', 3500);
             }
@@ -94,7 +94,7 @@ function Home() {
         }
     }
 
-    async function handleSetPriceAlert(item: any, amount: string) {
+    async function handleSetPriceAlert(item: any, index: number, amount: string) {
         try {
             const response = await fetch('wishlistpricealert', {
                 method: 'POST',

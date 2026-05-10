@@ -122,41 +122,52 @@ namespace EasyDeal.Server.Controllers
             _logger.LogInformation($"Game deal to add: {gameDeal.external}");
             // Implement logic to add the game deal to the wishlist
 
-            //check if Wishlist gane record with user id is already in db
-            bool inWishlist = _context.Wishlists
-                .Any(w => w.GameId == gameDeal.gameID && w.UserId == userid && !w.IsDeleted);
+            //check if Wishlist game record with user id is already in db
+            List<Wishlist> wishlist_game = _context.Wishlists
+                .Where(w => w.GameId == gameDeal.gameID && w.UserId == userid)
+                .ToList();
 
-            if (inWishlist)
+            _logger.LogInformation($"wishlist game info: {wishlist_game}");
+
+            if (wishlist_game.Count == 0)
+            {
+                // Map GameDeal to Wishlist
+                Wishlist wishlistEntry = new Wishlist
+                {
+                    GameName = gameDeal.external,
+                    GameId = gameDeal.gameID,
+                    DateAdded = DateTime.UtcNow,
+                    UserId = userid
+                    // IsDeleted defaults to false since it is a bool
+                };
+
+                _context.Wishlists.Add(wishlistEntry);
+                int result = _context.SaveChanges();
+
+                if (result == 0)
+                {
+                    _logger.LogError($"Not able to save changes - check db connection");
+                    return WishlistResult.DatabaseError;
+                }
+
+                _logger.LogInformation($"New wishlist add saved successfully");
+                return WishlistResult.Success; // returns as success if at least one row was affected
+            }
+
+            // Return with already exisits if record is not set deleted
+            else if (wishlist_game[0].IsDeleted == false)
             {
                 _logger.LogInformation($"Game is already in wishlist for this user: {gameDeal.external}");
                 return WishlistResult.AlreadyExists;
             }
 
-            //bool in_wishlist = from _context.Wishlists
-            // Map GameDeal to Wishlist
-            Wishlist wishlistEntry = new Wishlist
+            // Game is already in wishlist but has been soft deleted previously
+            else
             {
-                GameName = gameDeal.external,
-                GameId = gameDeal.gameID,
-                DateAdded = DateTime.UtcNow,
-                UserId = userid
-                // IsDeleted defaults to false since it is a bool
-            };
-
-            _context.Wishlists.Add(wishlistEntry);
-            int result = _context.SaveChanges();
-
-            if (result == 0)
-            {
-                _logger.LogError($"Not able to save changes - check db connection");
-                return WishlistResult.DatabaseError;
+                wishlist_game[0].IsDeleted = false;
+                _context.SaveChanges();
+                return WishlistResult.Success;
             }
-
-            _logger.LogInformation($"New wishlist add saved successfully");
-            return WishlistResult.Success; // returns as success if at least one row was affected
-
-
-
         }
     }
 }
