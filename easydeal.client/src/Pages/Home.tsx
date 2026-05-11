@@ -95,6 +95,7 @@ function Home() {
     }
 
     async function handleSetPriceAlert(item: any, index: number, amount: string) {
+        void index;
         try {
             const response = await fetch('wishlistpricealert', {
                 method: 'POST',
