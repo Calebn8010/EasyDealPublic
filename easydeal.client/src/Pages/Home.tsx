@@ -9,8 +9,16 @@ function Home() {
     const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
     const [dealInfo, setInfo] = useState<any | null>(null);
     const [showWishlist, setShowWishlist] = useState(false);
-    const [wishlistItems, setWishlistItems] = useState<any[]>([]);
+    const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
     const [wishlistLoading, setWishlistLoading] = useState(false);
+
+    interface WishlistItem {
+        gameID?: string;
+        thumb?: string;
+        external?: string;
+        title?: string;
+        cheapest?: string;
+    }
 
     async function handleSearch(query: string) {
         setExpandedIdx(null);
@@ -76,7 +84,7 @@ function Home() {
         }
     }
 
-    async function handleDeleteWishlistItem(item: any, index: number) {
+    async function handleDeleteWishlistItem(item: WishlistItem, index: number) {
         try {
             const response = await fetch('wishlistupdates', {
                 method: 'DELETE',
@@ -94,15 +102,15 @@ function Home() {
         }
     }
 
-    async function handleSetPriceAlert(item: any, index: number, amount: string) {
+    async function handleSetPriceAlert(item: WishlistItem, index: number, amount: string) {
         void index;
         try {
             const response = await fetch('wishlistpricealert', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    gameId: item.external,
-                    title: item.title,
+                    gameId: item.gameID,
+                    title: item.external,
                     targetPrice: parseFloat(amount),
                 }),
             });
