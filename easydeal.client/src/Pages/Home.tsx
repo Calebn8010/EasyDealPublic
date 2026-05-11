@@ -3,6 +3,8 @@ import AuthorizeView from "../Components/AuthorizeView.tsx";
 import Navbar from "../Components/Navbar.tsx";
 import WishlistPanel from "../Components/WishlistPanel.tsx";
 import MainContent from "../Components/MainContent.tsx";
+import type { WishlistItem } from "../Components/WishlistPanel.tsx";
+import type { Deal } from "../Components/MainContent.tsx"
 
 function Home() {
     const [deals, setDeals] = useState<any[]>([]);
@@ -12,13 +14,7 @@ function Home() {
     const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
     const [wishlistLoading, setWishlistLoading] = useState(false);
 
-    interface WishlistItem {
-        gameID?: string;
-        thumb?: string;
-        external?: string;
-        title?: string;
-        cheapest?: string;
-    }
+ 
 
     async function handleSearch(query: string) {
         setExpandedIdx(null);
@@ -40,7 +36,7 @@ function Home() {
         setTimeout(() => document.body.removeChild(notification), duration);
     }
 
-    async function handleAdd(deal: object) {
+    async function handleAdd(deal: Deal) {
         const response = await fetch('wishlistupdates', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
