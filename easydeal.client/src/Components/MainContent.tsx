@@ -1,7 +1,7 @@
 import SearchForm from "./DealSearch.tsx";
 import DealList from "./DealList.tsx";
 
-interface Deal {
+export interface Deal {
     thumb: string;
     external?: string;
     cheapest?: string;

@@ -3,14 +3,18 @@ import AuthorizeView from "../Components/AuthorizeView.tsx";
 import Navbar from "../Components/Navbar.tsx";
 import WishlistPanel from "../Components/WishlistPanel.tsx";
 import MainContent from "../Components/MainContent.tsx";
+import type { WishlistItem } from "../Components/WishlistPanel.tsx";
+import type { Deal } from "../Components/MainContent.tsx"
 
 function Home() {
     const [deals, setDeals] = useState<any[]>([]);
     const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
     const [dealInfo, setInfo] = useState<any | null>(null);
     const [showWishlist, setShowWishlist] = useState(false);
-    const [wishlistItems, setWishlistItems] = useState<any[]>([]);
+    const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
     const [wishlistLoading, setWishlistLoading] = useState(false);
+
+ 
 
     async function handleSearch(query: string) {
         setExpandedIdx(null);
@@ -32,7 +36,7 @@ function Home() {
         setTimeout(() => document.body.removeChild(notification), duration);
     }
 
-    async function handleAdd(deal: object) {
+    async function handleAdd(deal: Deal) {
         const response = await fetch('wishlistupdates', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -76,7 +80,7 @@ function Home() {
         }
     }
 
-    async function handleDeleteWishlistItem(item: any, index: number) {
+    async function handleDeleteWishlistItem(item: WishlistItem, index: number) {
         try {
             const response = await fetch('wishlistupdates', {
                 method: 'DELETE',
@@ -94,14 +98,15 @@ function Home() {
         }
     }
 
-    async function handleSetPriceAlert(item: any, index: number, amount: string) {
+    async function handleSetPriceAlert(item: WishlistItem, index: number, amount: string) {
+        void index;
         try {
             const response = await fetch('wishlistpricealert', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    gameId: item.external,
-                    title: item.title,
+                    gameId: item.gameID,
+                    title: item.external,
                     targetPrice: parseFloat(amount),
                 }),
             });

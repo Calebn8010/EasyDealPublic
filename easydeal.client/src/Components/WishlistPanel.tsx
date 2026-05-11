@@ -1,6 +1,7 @@
 ﻿import { useState } from 'react';
 
-interface WishlistItem {
+export interface WishlistItem {
+    gameID?: string;
     thumb?: string;
     external?: string;
     title?: string;
