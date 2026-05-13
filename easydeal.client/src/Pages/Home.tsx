@@ -106,7 +106,7 @@ function Home() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     gameId: item.gameID,
-                    title: item.external,
+                    external: item.external,
                     targetPrice: parseFloat(amount),
                 }),
             });
