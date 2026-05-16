@@ -14,6 +14,8 @@ namespace EasyDeal.Server.Data
 
         public string GameId { get; set; }
 
+        public string TargetPrice { get; set; }
+
         public DateTime DateAdded { get; set; } = DateTime.UtcNow;
 
         public DateTime DateSetInactive { get; set; } = DateTime.UtcNow;
