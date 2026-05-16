@@ -101,13 +101,13 @@ function Home() {
     async function handleSetPriceAlert(item: WishlistItem, index: number, amount: string) {
         void index;
         try {
-            const response = await fetch('wishlistpricealert', {
+            const response = await fetch('wishlistalerts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     gameId: item.gameID,
-                    title: item.external,
-                    targetPrice: parseFloat(amount),
+                    external: item.external,
+                    targetPrice: parseFloat(amount).toFixed(2),
                 }),
             });
             if (response.ok) {
