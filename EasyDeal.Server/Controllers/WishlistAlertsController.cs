@@ -76,29 +76,7 @@ namespace EasyDeal.Server.Controllers
                 _context.SaveChanges();
             }
 
-            // Map GameDeal to Wishlist
-            WishlistAlert wishlistAlertEntry = new WishlistAlert
-            {
-                GameName = game.external,
-                GameId = game.gameId,
-                TargetPrice = game.targetPrice,
-                DateAdded = DateTime.UtcNow,
-                UserId = userid,
-                IsActive = true
-                // IsDeleted defaults to false since it is a bool
-            };
-
-            _context.WishlistAlerts.Add(wishlistAlertEntry);
-            int result = _context.SaveChanges();
-
-            if (result == 0)
-            {
-                _logger.LogError($"Not able to save changes - check db connection");
-                return WishlistAlertResult.DatabaseError;
-            }
-
-            _logger.LogInformation($"New wishlist add saved successfully");
-            return WishlistAlertResult.Success; // returns as success if at least one row was affected
+            return CreateNewWishlistAlert(game, userid);
         }
 
 
