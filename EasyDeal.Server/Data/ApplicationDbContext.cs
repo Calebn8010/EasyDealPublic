@@ -13,7 +13,7 @@ namespace EasyDeal.Server.Data
 
         public DbSet<Wishlist> Wishlists { get; set; }
 
-        public DbSet<Models.WishlistAlert> WishlistAlerts { get; set; }
+        public DbSet<WishlistAlert> WishlistAlerts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
