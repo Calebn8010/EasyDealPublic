@@ -88,6 +88,10 @@ export default defineConfig({
             '^/wishlistupdates': {
                 target,
                 secure: false
+            },
+            '^/wishlistalerts': {
+                target,
+                secure: false
             }
         },
         port: parseInt(env.DEV_SERVER_PORT || '49366'),
