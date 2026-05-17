@@ -18,9 +18,9 @@ namespace EasyDeal.Server.Data
 
         public DateTime DateAdded { get; set; } = DateTime.UtcNow;
 
-        public DateTime DateSetInactive { get; set; } = DateTime.UtcNow;
+        public DateTime DateSetInactive { get; set; }
 
-        public DateTime DateDeleted { get; set; } = DateTime.UtcNow;
+        public DateTime DateDeleted { get; set; }
 
         public string UserId { get; set; }
 
