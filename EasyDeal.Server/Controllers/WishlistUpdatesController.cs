@@ -1,4 +1,5 @@
-﻿using EasyDeal.Server.Data;
+﻿using Azure.Core;
+using EasyDeal.Server.Data;
 using EasyDeal.Server.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,8 @@ namespace EasyDeal.Server.Controllers
         {
             Success,
             AlreadyExists,
-            DatabaseError
+            DatabaseError,
+            NotFound
         }
 
         // Handles Post request from front end for WishlistUpdates endpoint
@@ -68,19 +70,29 @@ namespace EasyDeal.Server.Controllers
 
             _logger.LogInformation($"User id: {userId}");
 
-            // Update user's wishlist entry for selected game deal id
-            Wishlist? game_deal = await _context.Wishlists
-                .FirstOrDefaultAsync(w => w.UserId == userId && w.GameId == request.gameID);
+            WishlistResult status_result = await DeleteWishlistItem(request, userId);
 
-            // Return 404 if gamne deal not found in Wishlist db
-            if (game_deal == null)
-                return NotFound("Wishlist entry not found.");
+            return status_result switch
+            {
+                WishlistResult.Success => Ok(),
+                WishlistResult.NotFound => Conflict("Already in wishlist"),
+                WishlistResult.DatabaseError => StatusCode(500, "Failed to save"),
+                _ => BadRequest()
+            };
 
-            // Soft delete user game deal requested
-            game_deal.IsDeleted = true;
-            int result = await _context.SaveChangesAsync();
+            //// Update user's wishlist entry for selected game deal id
+            //Wishlist ? game_deal = await _context.Wishlists
+            //    .FirstOrDefaultAsync(w => w.UserId == userId && w.GameId == request.gameID);
 
-            return result > 0 ? Ok() : StatusCode(500, "Failed to delete.");
+            //// Return 404 if gamne deal not found in Wishlist db
+            //if (game_deal == null)
+            //    return NotFound("Wishlist entry not found.");
+
+            //// Soft delete user game deal requested
+            //game_deal.IsDeleted = true;
+            //int result = await _context.SaveChangesAsync();
+
+            //return result > 0 ? Ok() : StatusCode(500, "Failed to delete.");
 
         }
 
@@ -105,12 +117,18 @@ namespace EasyDeal.Server.Controllers
                 .OrderByDescending(w => w.DateAdded)
                 .ToListAsync();
 
+            // Load all alerts for this user once (avoids N+1 queries)
+            List<WishlistAlert> alerts = await _context.WishlistAlerts
+                .Where(w => w.UserId == userId && !w.IsDeleted && w.IsActive)
+                .ToListAsync();
+
             // Map to a DTO that matches what the frontend expects
             var result = wishlist.Select(w => new
             {
                 external = w.GameName,
                 gameID = w.GameId,
-                dateAdded = w.DateAdded
+                dateAdded = w.DateAdded,
+                targetPrice = alerts.FirstOrDefault(a => a.GameId == w.GameId)?.TargetPrice
             });
 
             return Ok(result);
@@ -168,6 +186,54 @@ namespace EasyDeal.Server.Controllers
                 _context.SaveChanges();
                 return WishlistResult.Success;
             }
+        }
+
+        private async Task<WishlistResult> DeleteWishlistItem(WishlistItem item, string userId)
+        {
+            // Update user's wishlist entry for selected game deal id
+            Wishlist? game_deal = await _context.Wishlists
+                .FirstOrDefaultAsync(w => w.UserId == userId && w.GameId == item.gameID);
+
+            // Return 404 if gamne deal not found in Wishlist db
+            if (game_deal == null)
+            {
+                _logger.LogWarning("Wishlist Item not found when calling DeleteWishlistItem().");
+                return WishlistResult.NotFound;
+            }
+                
+
+            // Soft delete user Wishlist item requested
+            game_deal.IsDeleted = true;
+            int result = await _context.SaveChangesAsync();
+
+            if (result == 0)
+            {
+                _logger.LogWarning("Failed to delete when calling DeleteWishlistItem() > WishlistItem");
+                return WishlistResult.DatabaseError;
+            }
+
+            //Find WishlistAlert record with user id is already in db and soft delete
+            WishlistAlert? wishlist_game = _context.WishlistAlerts
+                .Where(w => w.GameId == item.gameID && w.UserId == userId && w.IsActive == true)
+                .FirstOrDefault();
+
+            wishlist_game.IsActive = false;
+            wishlist_game.IsDeleted = true;
+            wishlist_game.DateDeleted = DateTime.UtcNow;
+
+            int result2 = await _context.SaveChangesAsync();
+
+            if (result2 == 0)
+            {
+                _logger.LogWarning("Failed to delete when calling DeleteWishlistItem() > WishlistAlert");
+                return WishlistResult.DatabaseError;
+            }
+
+            return WishlistResult.Success;
+
+
+
+
         }
     }
 }

@@ -64,7 +64,7 @@ namespace EasyDeal.Server.Controllers
 
             //check if WishlistAlert record with user id is already in db
             List<WishlistAlert> wishlist_game = _context.WishlistAlerts
-                .Where(w => w.GameId == game.gameId && w.UserId == userid)
+                .Where(w => w.GameId == game.gameId && w.UserId == userid && w.IsActive == true)
                 .ToList();
 
             _logger.LogInformation($"wishlist game info: {wishlist_game}");
@@ -73,8 +73,11 @@ namespace EasyDeal.Server.Controllers
             if (wishlist_game.Count > 0)
             {
                 wishlist_game[0].IsActive = false;
+                wishlist_game[0].DateSetInactive = DateTime.UtcNow;
                 _context.SaveChanges();
             }
+            else
+                _logger.LogWarning("Count greater than on for wishlistgame added > AddToWishlistAlerts()");
 
             return CreateNewWishlistAlert(game, userid);
         }
