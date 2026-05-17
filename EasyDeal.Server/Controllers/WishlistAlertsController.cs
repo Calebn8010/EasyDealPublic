@@ -73,8 +73,11 @@ namespace EasyDeal.Server.Controllers
             if (wishlist_game.Count > 0)
             {
                 wishlist_game[0].IsActive = false;
+                wishlist_game[0].DateSetInactive = DateTime.UtcNow;
                 _context.SaveChanges();
             }
+            else
+                _logger.LogWarning("Count greater than on for wishlistgame added > AddToWishlistAlerts()");
 
             return CreateNewWishlistAlert(game, userid);
         }
