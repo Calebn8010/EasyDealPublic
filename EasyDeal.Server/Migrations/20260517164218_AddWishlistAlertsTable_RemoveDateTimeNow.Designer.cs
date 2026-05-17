@@ -4,6 +4,7 @@ using EasyDeal.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EasyDeal.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260517164218_AddWishlistAlertsTable_RemoveDateTimeNow")]
+    partial class AddWishlistAlertsTable_RemoveDateTimeNow
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -130,10 +133,10 @@ namespace EasyDeal.Server.Migrations
                     b.Property<DateTime>("DateAdded")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("DateDeleted")
+                    b.Property<DateTime>("DateDeleted")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("DateSetInactive")
+                    b.Property<DateTime>("DateSetInactive")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("GameId")
