@@ -6,6 +6,7 @@ export interface WishlistItem {
     external?: string;
     title?: string;
     cheapest?: string;
+    targetPrice?: string;
 }
 
 interface Props {
@@ -17,7 +18,12 @@ interface Props {
 }
 
 function WishlistPanel({ items, loading, onClose, onDelete, onSetAlert }: Props) {
-    const [alertValues, setAlertValues] = useState<Record<number, string>>({});
+    const [alertValues, setAlertValues] = useState<Record<number, string>>(
+        () => items.reduce((acc, item, i) => {
+            if (item.targetPrice) acc[i] = item.targetPrice;
+            return acc;
+        }, {} as Record<number, string>)
+    );
     const [alertStatus, setAlertStatus] = useState<Record<number, 'idle' | 'saving' | 'saved' | 'error'>>({});
     const [deleteStatus, setDeleteStatus] = useState<Record<number, 'idle' | 'deleting'>>({});
 
@@ -77,7 +83,9 @@ function WishlistPanel({ items, loading, onClose, onDelete, onSetAlert }: Props)
                                     )}
 
                                     <div className="wishlist-item-alert-row">
-                                        <span className="wishlist-alert-label">Email alert me at $</span>
+                                        <span className="wishlist-alert-label">
+                                            {item.targetPrice ? 'Email alert will send at $' : 'Email alert me at $'}
+                                        </span>
                                         <input
                                             type="number"
                                             min="0"
@@ -102,7 +110,7 @@ function WishlistPanel({ items, loading, onClose, onDelete, onSetAlert }: Props)
                                             {alertStatus[i] === 'saving' ? '…'
                                                 : alertStatus[i] === 'saved' ? '✓'
                                                     : alertStatus[i] === 'error' ? '!'
-                                                        : 'Set'}
+                                                        : item.targetPrice ? 'Set New Price' : 'Set'}
                                         </button>
                                     </div>
                                 </div>
