@@ -105,12 +105,18 @@ namespace EasyDeal.Server.Controllers
                 .OrderByDescending(w => w.DateAdded)
                 .ToListAsync();
 
+            // Load all alerts for this user once (avoids N+1 queries)
+            List<WishlistAlert> alerts = await _context.WishlistAlerts
+                .Where(w => w.UserId == userId && !w.IsDeleted && w.IsActive)
+                .ToListAsync();
+
             // Map to a DTO that matches what the frontend expects
             var result = wishlist.Select(w => new
             {
                 external = w.GameName,
                 gameID = w.GameId,
-                dateAdded = w.DateAdded
+                dateAdded = w.DateAdded,
+                targetPrice = alerts.FirstOrDefault(a => a.GameId == w.GameId)?.TargetPrice
             });
 
             return Ok(result);
