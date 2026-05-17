@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+﻿import { useState, useEffect } from 'react';
 
 export interface WishlistItem {
     gameID?: string;
@@ -26,6 +26,18 @@ function WishlistPanel({ items, loading, onClose, onDelete, onSetAlert }: Props)
     );
     const [alertStatus, setAlertStatus] = useState<Record<number, 'idle' | 'saving' | 'saved' | 'error'>>({});
     const [deleteStatus, setDeleteStatus] = useState<Record<number, 'idle' | 'deleting'>>({});
+
+    useEffect(() => {
+        setAlertValues(prev => {
+            const next = { ...prev };
+            items.forEach((item, i) => {
+                if (item.targetPrice && !next[i]) {
+                    next[i] = item.targetPrice;
+                }
+            });
+            return next;
+        });
+    }, [items]);
 
     async function handleDelete(item: WishlistItem, index: number) {
         setDeleteStatus(s => ({ ...s, [index]: 'deleting' }));
