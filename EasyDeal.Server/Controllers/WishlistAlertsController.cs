@@ -64,7 +64,7 @@ namespace EasyDeal.Server.Controllers
 
             //check if WishlistAlert record with user id is already in db
             List<WishlistAlert> wishlist_game = _context.WishlistAlerts
-                .Where(w => w.GameId == game.gameId && w.UserId == userid)
+                .Where(w => w.GameId == game.gameId && w.UserId == userid && w.IsActive == true)
                 .ToList();
 
             _logger.LogInformation($"wishlist game info: {wishlist_game}");

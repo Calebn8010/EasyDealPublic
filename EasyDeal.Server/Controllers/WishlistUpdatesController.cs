@@ -70,19 +70,29 @@ namespace EasyDeal.Server.Controllers
 
             _logger.LogInformation($"User id: {userId}");
 
-            // Update user's wishlist entry for selected game deal id
-            Wishlist? game_deal = await _context.Wishlists
-                .FirstOrDefaultAsync(w => w.UserId == userId && w.GameId == request.gameID);
+            WishlistResult status_result = await DeleteWishlistItem(request, userId);
 
-            // Return 404 if gamne deal not found in Wishlist db
-            if (game_deal == null)
-                return NotFound("Wishlist entry not found.");
+            return status_result switch
+            {
+                WishlistResult.Success => Ok(),
+                WishlistResult.NotFound => Conflict("Already in wishlist"),
+                WishlistResult.DatabaseError => StatusCode(500, "Failed to save"),
+                _ => BadRequest()
+            };
 
-            // Soft delete user game deal requested
-            game_deal.IsDeleted = true;
-            int result = await _context.SaveChangesAsync();
+            //// Update user's wishlist entry for selected game deal id
+            //Wishlist ? game_deal = await _context.Wishlists
+            //    .FirstOrDefaultAsync(w => w.UserId == userId && w.GameId == request.gameID);
 
-            return result > 0 ? Ok() : StatusCode(500, "Failed to delete.");
+            //// Return 404 if gamne deal not found in Wishlist db
+            //if (game_deal == null)
+            //    return NotFound("Wishlist entry not found.");
+
+            //// Soft delete user game deal requested
+            //game_deal.IsDeleted = true;
+            //int result = await _context.SaveChangesAsync();
+
+            //return result > 0 ? Ok() : StatusCode(500, "Failed to delete.");
 
         }
 
@@ -204,7 +214,7 @@ namespace EasyDeal.Server.Controllers
 
             //Find WishlistAlert record with user id is already in db and soft delete
             WishlistAlert? wishlist_game = _context.WishlistAlerts
-                .Where(w => w.GameId == item.gameID && w.UserId == userId)
+                .Where(w => w.GameId == item.gameID && w.UserId == userId && w.IsActive == true)
                 .FirstOrDefault();
 
             wishlist_game.IsActive = false;
