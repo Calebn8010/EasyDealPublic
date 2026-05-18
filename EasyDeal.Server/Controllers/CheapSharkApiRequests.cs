@@ -1,17 +1,23 @@
-﻿using System.Text.Json.Nodes;
+﻿using EasyDeal.Server.Data;
+using EasyDeal.Server.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Net.Http;
 using System.Text.Json.Nodes;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using static System.Net.WebRequestMethods;
 using static System.Runtime.InteropServices.JavaScript.JSType;
-using EasyDeal.Server.Models;
 
 namespace EasyDeal.Server.Controllers
 {
     public class CheapSharkApiRequests
     {
+        private readonly ILogger<CheapSharkApiRequests> _logger;
+        public CheapSharkApiRequests(ILogger<CheapSharkApiRequests> logger)
+        {
+            _logger = logger;
+        }
         // Centralized factory so every HttpClient created here includes the User-Agent header.
         private static HttpClient CreateHttpClient()
         {
@@ -208,6 +214,41 @@ namespace EasyDeal.Server.Controllers
             }
         }
 
+
+        public static async Task SetAlert(string gameId, string email, string price)
+        {
+            using (HttpClient client = CreateHttpClient())
+            {
+                try
+                {
+                    //string url = $"https://www.cheapshark.com/api/1.0/deals?id={id}";
+                    //https://www.cheapshark.com/api/1.0/alerts?action=set&email=someone@example.org&gameID=59&price=14.99
+                    string url = $"https://www.cheapshark.com/api/1.0/alerts?action=set&email={email}&gameID={gameId}&price={price}";
+                    HttpResponseMessage response = await client.GetAsync(url);
+
+                    response.EnsureSuccessStatusCode(); // Throws an exception for 4xx/5xx responses
+
+                    Console.WriteLine("Response received");
+
+                    string type = response.Content.GetType().ToString();
+
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    //Console.WriteLine(responseBody);
+
+                    // Deserialize the JSON response into a dynamic object
+                    JsonNode jsonResponse = JsonNode.Parse(responseBody);
+                    Console.WriteLine(jsonResponse);
+                    //Console.WriteLine(jsonResponse["gameInfo"]);
+                    //Console.WriteLine(jsonResponse["cheapestPrice"]);
+
+                    //JsonNode gameInfo = jsonResponse["gameInfo"];
+                }
+                catch (HttpRequestException e)
+                {
+                    Console.WriteLine($"Request error: {e.Message}");
+                }
+            }
+        }
         public static async Task GetRequestIdOld(string id)
         {
             using (HttpClient client = CreateHttpClient())
