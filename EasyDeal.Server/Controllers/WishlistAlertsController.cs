@@ -1,4 +1,5 @@
-﻿using EasyDeal.Server.Data;
+﻿using Azure.Core;
+using EasyDeal.Server.Data;
 using EasyDeal.Server.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -45,7 +46,7 @@ namespace EasyDeal.Server.Controllers
 
             
 
-            WishlistAlertResult status_result = AddToWishlistAlerts(request, userId);
+            WishlistAlertResult status_result = await AddToWishlistAlerts(request, userId);
 
             return status_result switch
             {
@@ -57,10 +58,14 @@ namespace EasyDeal.Server.Controllers
             
         }
 
-        private WishlistAlertResult AddToWishlistAlerts(WishlistGameAlert game, string userid)
+        private async Task<WishlistAlertResult> AddToWishlistAlerts(WishlistGameAlert game, string userid)
         {
             _logger.LogInformation($"Game deal to add to WishlistAlerts: {game.external}");
             // Implement logic to add the game deal to the wishlist
+
+            _logger.LogInformation($"------------------------");
+            await CheapSharkApiRequests.SetAlert(game.gameId, "calebn8010@gmail.com", game.targetPrice, _logger);
+            _logger.LogInformation($"------------------------");
 
             //check if WishlistAlert record with user id is already in db
             List<WishlistAlert> wishlist_game = _context.WishlistAlerts
