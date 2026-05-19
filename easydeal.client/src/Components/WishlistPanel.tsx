@@ -18,25 +18,22 @@ interface Props {
 }
 
 function WishlistPanel({ items, loading, onClose, onDelete, onSetAlert }: Props) {
-    const [alertValues, setAlertValues] = useState<Record<number, string>>(
-        () => items.reduce((acc, item, i) => {
-            if (item.targetPrice) acc[i] = item.targetPrice;
+    const [alertValues, setAlertValues] = useState<Record<string, string>>(() =>
+        items.reduce((acc, item) => {
+            if (item.targetPrice && item.gameID) acc[item.gameID] = item.targetPrice;
             return acc;
-        }, {} as Record<number, string>)
+        }, {} as Record<string, string>)
     );
     const [alertStatus, setAlertStatus] = useState<Record<number, 'idle' | 'saving' | 'saved' | 'error'>>({});
     const [deleteStatus, setDeleteStatus] = useState<Record<number, 'idle' | 'deleting'>>({});
 
     useEffect(() => {
-        setAlertValues(prev => {
-            const next = { ...prev };
-            items.forEach((item, i) => {
-                if (item.targetPrice && !next[i]) {
-                    next[i] = item.targetPrice;
-                }
-            });
-            return next;
-        });
+        setAlertValues(
+            items.reduce((acc, item) => {
+                if (item.gameID) acc[item.gameID] = item.targetPrice ?? '';
+                return acc;
+            }, {} as Record<string, string>)
+        );
     }, [items]);
 
     async function handleDelete(item: WishlistItem, index: number) {
@@ -49,7 +46,8 @@ function WishlistPanel({ items, loading, onClose, onDelete, onSetAlert }: Props)
     }
 
     async function handleSetAlert(item: WishlistItem, index: number) {
-        const amount = alertValues[index]?.trim();
+        const key = item.gameID ?? index;
+        const amount = alertValues[key]?.trim();
         if (!amount || isNaN(Number(amount)) || Number(amount) < 0) return;
 
         setAlertStatus(s => ({ ...s, [index]: 'saving' }));
@@ -104,8 +102,8 @@ function WishlistPanel({ items, loading, onClose, onDelete, onSetAlert }: Props)
                                             step="0.01"
                                             placeholder="0.00"
                                             className="wishlist-alert-input"
-                                            value={alertValues[i] ?? ''}
-                                            onChange={e => setAlertValues(v => ({ ...v, [i]: e.target.value }))}
+                                            value={alertValues[item.gameID ?? i] ?? ''}
+                                            onChange={e => setAlertValues(v => ({ ...v, [item.gameID ?? i]: e.target.value }))}
                                             onKeyDown={e => e.key === 'Enter' && handleSetAlert(item, i)}
                                             aria-label={`Set price alert for ${item.external ?? item.title}`}
                                         />
