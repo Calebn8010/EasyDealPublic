@@ -1,6 +1,7 @@
 ﻿using EasyDeal.Server.Data;
 using EasyDeal.Server.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Net.Http;
 using System.Text.Json.Nodes;
@@ -13,12 +14,13 @@ namespace EasyDeal.Server.Controllers
 {
     public class CheapSharkApiRequests
     {
-        private readonly ILogger<CheapSharkApiRequests> _logger;
-        public CheapSharkApiRequests(ILogger<CheapSharkApiRequests> logger)
-        {
-            _logger = logger;
-        }
         // Centralized factory so every HttpClient created here includes the User-Agent header.
+        public enum SetAlertResult
+        {
+            Success,
+            Failed,
+            Error
+        }
         private static HttpClient CreateHttpClient()
         {
             var client = new HttpClient();
@@ -215,7 +217,7 @@ namespace EasyDeal.Server.Controllers
         }
 
 
-        public static async Task SetAlert(string gameId, string email, string price)
+        public static async Task<SetAlertResult> SetAlert(string gameId, string email, string price, ILogger<WishlistAlertsController> logger)
         {
             using (HttpClient client = CreateHttpClient())
             {
@@ -227,8 +229,7 @@ namespace EasyDeal.Server.Controllers
                     HttpResponseMessage response = await client.GetAsync(url);
 
                     response.EnsureSuccessStatusCode(); // Throws an exception for 4xx/5xx responses
-
-                    Console.WriteLine("Response received");
+                    logger.LogInformation("Response received");
 
                     string type = response.Content.GetType().ToString();
 
@@ -237,7 +238,21 @@ namespace EasyDeal.Server.Controllers
 
                     // Deserialize the JSON response into a dynamic object
                     JsonNode jsonResponse = JsonNode.Parse(responseBody);
-                    Console.WriteLine(jsonResponse);
+                    //Console.WriteLine(jsonResponse);
+
+                    // Handle cheapshark api response for setting alert attempt
+                    if (jsonResponse != null)
+                    {
+                        logger.LogInformation(jsonResponse.ToJsonString());
+                        if (jsonResponse.ToString() == "true")
+                            return SetAlertResult.Success;
+                        if (jsonResponse.ToString() == "false")
+                            return SetAlertResult.Failed;
+
+                    }
+
+                    return SetAlertResult.Error;
+
                     //Console.WriteLine(jsonResponse["gameInfo"]);
                     //Console.WriteLine(jsonResponse["cheapestPrice"]);
 
@@ -245,7 +260,8 @@ namespace EasyDeal.Server.Controllers
                 }
                 catch (HttpRequestException e)
                 {
-                    Console.WriteLine($"Request error: {e.Message}");
+                    logger.LogWarning($"Request error: {e.Message}");
+                    return SetAlertResult.Error;
                 }
             }
         }
