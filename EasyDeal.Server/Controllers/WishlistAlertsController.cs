@@ -1,4 +1,5 @@
-﻿using EasyDeal.Server.Data;
+﻿using Azure.Core;
+using EasyDeal.Server.Data;
 using EasyDeal.Server.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -43,24 +44,46 @@ namespace EasyDeal.Server.Controllers
 
             //return Ok();
 
-            
+            // Get user's email 
+            ApplicationUser? user = await _context.Users
+                .FirstOrDefaultAsync(w => w.Id == userId);
 
-            WishlistAlertResult status_result = AddToWishlistAlerts(request, userId);
+            string? user_email = user.UserName;
 
-            return status_result switch
+            // Attempt to set alert to CheapShark Api - exit out if failed before adding to EasyDeal db
+            SetAlertResult set_result = await SetCheapSharkAlert(request, userId, user_email);
+
+            if (set_result == SetAlertResult.Error || set_result == SetAlertResult.Failed)
+            {
+                return StatusCode(500, "Failed to set alert");
+            }
+
+            WishlistAlertResult add_status_result = await AddToWishlistAlerts(request, userId, user_email);
+
+            return add_status_result switch
             {
                 WishlistAlertResult.Success => Ok(),
-                WishlistAlertResult.DatabaseError => StatusCode(500, "Failed to save"),
+                WishlistAlertResult.DatabaseError => StatusCode(500, "Failed to save to Easy Deal db"),
                 _ => BadRequest()
             };
 
             
         }
 
-        private WishlistAlertResult AddToWishlistAlerts(WishlistGameAlert game, string userid)
+        private async Task<SetAlertResult> SetCheapSharkAlert(WishlistGameAlert game, string userid, string email)
+        {
+            _logger.LogInformation($"------------------------");
+            SetAlertResult result = await CheapSharkApiRequests.SetAlert(game.gameId, email, game.targetPrice, _logger);
+            _logger.LogInformation($"------------------------");
+
+            return result;
+        }
+
+        private async Task<WishlistAlertResult> AddToWishlistAlerts(WishlistGameAlert game, string userid, string email)
         {
             _logger.LogInformation($"Game deal to add to WishlistAlerts: {game.external}");
             // Implement logic to add the game deal to the wishlist
+
 
             //check if WishlistAlert record with user id is already in db
             List<WishlistAlert> wishlist_game = _context.WishlistAlerts

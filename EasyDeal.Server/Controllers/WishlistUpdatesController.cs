@@ -200,7 +200,7 @@ namespace EasyDeal.Server.Controllers
                 _logger.LogWarning("Wishlist Item not found when calling DeleteWishlistItem().");
                 return WishlistResult.NotFound;
             }
-                
+
 
             // Soft delete user Wishlist item requested
             game_deal.IsDeleted = true;
@@ -212,28 +212,31 @@ namespace EasyDeal.Server.Controllers
                 return WishlistResult.DatabaseError;
             }
 
-            //Find WishlistAlert record with user id is already in db and soft delete
-            WishlistAlert? wishlist_game = _context.WishlistAlerts
+            // Find WishlistAlert record for this user/game (active) and soft delete if present
+            WishlistAlert? wishlist_game = await _context.WishlistAlerts
                 .Where(w => w.GameId == item.gameID && w.UserId == userId && w.IsActive == true)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
 
-            wishlist_game.IsActive = false;
-            wishlist_game.IsDeleted = true;
-            wishlist_game.DateDeleted = DateTime.UtcNow;
-
-            int result2 = await _context.SaveChangesAsync();
-
-            if (result2 == 0)
+            if (wishlist_game != null)
             {
-                _logger.LogWarning("Failed to delete when calling DeleteWishlistItem() > WishlistAlert");
-                return WishlistResult.DatabaseError;
+                wishlist_game.IsActive = false;
+                wishlist_game.IsDeleted = true;
+                wishlist_game.DateDeleted = DateTime.UtcNow;
+
+                int result2 = await _context.SaveChangesAsync();
+
+                if (result2 == 0)
+                {
+                    _logger.LogWarning("Failed to delete when calling DeleteWishlistItem() > WishlistAlert");
+                    return WishlistResult.DatabaseError;
+                }
+            }
+            else
+            {
+                _logger.LogInformation("No active WishlistAlert found for user/game; skipping alert deletion.");
             }
 
             return WishlistResult.Success;
-
-
-
-
         }
     }
 }
