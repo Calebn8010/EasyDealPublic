@@ -12,15 +12,17 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace EasyDeal.Server.Controllers
 {
+    public enum SetAlertResult
+    {
+        Success,
+        Failed,
+        Error
+    }
+
     public class CheapSharkApiRequests
     {
         // Centralized factory so every HttpClient created here includes the User-Agent header.
-        public enum SetAlertResult
-        {
-            Success,
-            Failed,
-            Error
-        }
+        
         private static HttpClient CreateHttpClient()
         {
             var client = new HttpClient();
