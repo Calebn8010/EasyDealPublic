@@ -249,7 +249,11 @@ namespace EasyDeal.Server.Controllers
                         if (jsonResponse.ToString() == "true")
                             return SetAlertResult.Success;
                         if (jsonResponse.ToString() == "false")
+                        {
+                            logger.LogError($"CheapSharkAPI set fialed");
                             return SetAlertResult.Failed;
+                        }
+                            
 
                     }
 
