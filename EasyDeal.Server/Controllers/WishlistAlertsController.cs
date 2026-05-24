@@ -73,7 +73,7 @@ namespace EasyDeal.Server.Controllers
         private async Task<SetAlertResult> SetCheapSharkAlert(WishlistGameAlert game, string userid, string email)
         {
             _logger.LogInformation($"------------------------");
-            SetAlertResult result = await CheapSharkApiRequests.SetAlert(game.gameId, email, game.targetPrice, _logger);
+            SetAlertResult result = await CheapSharkApiRequests.SetAlert(game.gameId, email, game.targetPrice, _logger, EmailAlertAction.Set);
             _logger.LogInformation($"------------------------");
 
             return result;
@@ -104,8 +104,6 @@ namespace EasyDeal.Server.Controllers
 
             return CreateNewWishlistAlert(game, userid);
         }
-
-
 
         private WishlistAlertResult CreateNewWishlistAlert(WishlistGameAlert game, string userid)
         {

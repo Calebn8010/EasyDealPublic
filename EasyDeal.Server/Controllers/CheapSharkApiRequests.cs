@@ -1,6 +1,7 @@
 ﻿using EasyDeal.Server.Data;
 using EasyDeal.Server.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Net.Http;
@@ -19,16 +20,29 @@ namespace EasyDeal.Server.Controllers
         Error
     }
 
+    public enum EmailAlertAction
+    {
+        Set,
+        Delete
+    }
+
     public class CheapSharkApiRequests
     {
+        private readonly ILogger<CheapSharkApiRequests> _logger;
+
         // Centralized factory so every HttpClient created here includes the User-Agent header.
-        
+
         private static HttpClient CreateHttpClient()
         {
             var client = new HttpClient();
             client.DefaultRequestHeaders.Add("User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36");
             return client;
+        }
+
+        public CheapSharkApiRequests(ILogger<CheapSharkApiRequests> logger)
+        {
+            _logger = logger;
         }
 
         public static async Task<List<GameDeal>> GetGameList(string game, ILogger<DealSearchController> logger)
@@ -219,7 +233,7 @@ namespace EasyDeal.Server.Controllers
         }
 
 
-        public static async Task<SetAlertResult> SetAlert(string gameId, string email, string price, ILogger<WishlistAlertsController> logger)
+        public static async Task<SetAlertResult> SetAlert(string gameId, string email, string price, ILogger logger, EmailAlertAction action_type)
         {
             using (HttpClient client = CreateHttpClient())
             {
@@ -227,7 +241,16 @@ namespace EasyDeal.Server.Controllers
                 {
                     //string url = $"https://www.cheapshark.com/api/1.0/deals?id={id}";
                     //https://www.cheapshark.com/api/1.0/alerts?action=set&email=someone@example.org&gameID=59&price=14.99
-                    string url = $"https://www.cheapshark.com/api/1.0/alerts?action=set&email={email}&gameID={gameId}&price={price}";
+                    string set_url = $"https://www.cheapshark.com/api/1.0/alerts?action=set&email={email}&gameID={gameId}&price={price}";
+                    string delete_url = $"https://www.cheapshark.com/api/1.0/alerts?action=delete&email={email}&gameID={gameId}&price={price}";
+                    string url = "";
+                    if (action_type == EmailAlertAction.Set)
+                        url = set_url;
+                    else if (action_type == EmailAlertAction.Delete)
+                        url = delete_url;
+                        
+                    
+                        
                     HttpResponseMessage response = await client.GetAsync(url);
 
                     response.EnsureSuccessStatusCode(); // Throws an exception for 4xx/5xx responses
@@ -271,6 +294,8 @@ namespace EasyDeal.Server.Controllers
                 }
             }
         }
+
+        
         public static async Task GetRequestIdOld(string id)
         {
             using (HttpClient client = CreateHttpClient())
