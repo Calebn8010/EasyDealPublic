@@ -201,6 +201,22 @@ namespace EasyDeal.Server.Controllers
                 return WishlistResult.NotFound;
             }
 
+            // Get user's email 
+            ApplicationUser? user = await _context.Users
+                .FirstOrDefaultAsync(w => w.Id == userId);
+
+            string? user_email = user.UserName;
+
+            // Remove from Cheapshark api
+            _logger.LogInformation($"------------------------deleting");
+            SetAlertResult api_result = await CheapSharkApiRequests.SetAlert(item.gameID, user_email, "0", _logger, EmailAlertAction.Delete);
+            _logger.LogInformation($"------------------------");
+
+            if (api_result != SetAlertResult.Success)
+            {
+                _logger.LogWarning("Failed to delete from Cheapshark API exiting without deleting from Wishlist db");
+                return WishlistResult.DatabaseError;
+            }
 
             // Soft delete user Wishlist item requested
             game_deal.IsDeleted = true;
