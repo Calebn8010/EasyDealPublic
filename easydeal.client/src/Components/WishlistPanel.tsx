@@ -26,6 +26,13 @@ function WishlistPanel({ items, loading, onClose, onDelete, onSetAlert }: Props)
     );
     const [alertStatus, setAlertStatus] = useState<Record<number, 'idle' | 'saving' | 'saved' | 'error'>>({});
     const [deleteStatus, setDeleteStatus] = useState<Record<number, 'idle' | 'deleting'>>({});
+    // Track which items have had a price successfully set this session
+    const [confirmedAlerts, setConfirmedAlerts] = useState<Record<string, string>>(() =>
+        items.reduce((acc, item) => {
+            if (item.targetPrice && item.gameID) acc[item.gameID] = item.targetPrice;
+            return acc;
+        }, {} as Record<string, string>)
+    );
 
     useEffect(() => {
         setAlertValues(
@@ -34,6 +41,14 @@ function WishlistPanel({ items, loading, onClose, onDelete, onSetAlert }: Props)
                 return acc;
             }, {} as Record<string, string>)
         );
+        // Sync confirmed alerts when items reload (e.g. panel re-open)
+        setConfirmedAlerts(prev => {
+            const fromProps = items.reduce((acc, item) => {
+                if (item.targetPrice && item.gameID) acc[item.gameID] = item.targetPrice;
+                return acc;
+            }, {} as Record<string, string>);
+            return { ...prev, ...fromProps };
+        });
     }, [items]);
 
     async function handleDelete(item: WishlistItem, index: number) {
@@ -53,6 +68,10 @@ function WishlistPanel({ items, loading, onClose, onDelete, onSetAlert }: Props)
         setAlertStatus(s => ({ ...s, [index]: 'saving' }));
         try {
             await onSetAlert?.(item, index, amount);
+            // Optimistically update confirmed alerts so label/button swap immediately
+            if (item.gameID) {
+                setConfirmedAlerts(prev => ({ ...prev, [item.gameID!]: amount }));
+            }
             setAlertStatus(s => ({ ...s, [index]: 'saved' }));
             setTimeout(() => setAlertStatus(s => ({ ...s, [index]: 'idle' })), 2000);
         } catch {
@@ -78,63 +97,68 @@ function WishlistPanel({ items, loading, onClose, onDelete, onSetAlert }: Props)
                     <p className="wishlist-empty">No games in your wishlist yet. Search and add some!</p>
                 ) : (
                     <ul className="wishlist-list">
-                        {items.map((item, i) => (
-                            <li key={i} className="wishlist-item">
-                                {item.thumb && (
-                                    <img src={item.thumb} alt={item.external} className="wishlist-item-thumb" />
-                                )}
+                        {items.map((item, i) => {
+                            // Use local confirmed state instead of item.targetPrice for display
+                            const hasAlert = !!(item.gameID && confirmedAlerts[item.gameID]);
 
-                                <div className="wishlist-item-info">
-                                    <div className="wishlist-item-title">
-                                        {item.external ?? item.title ?? 'Game'}
-                                    </div>
-                                    {item.cheapest && (
-                                        <div className="wishlist-item-price">Best: ${item.cheapest}</div>
+                            return (
+                                <li key={i} className="wishlist-item">
+                                    {item.thumb && (
+                                        <img src={item.thumb} alt={item.external} className="wishlist-item-thumb" />
                                     )}
 
-                                    <div className="wishlist-item-alert-row">
-                                        <span className="wishlist-alert-label">
-                                            {item.targetPrice ? 'Email alert will send at $' : 'Email alert me at $'}
-                                        </span>
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            step="0.01"
-                                            placeholder="0.00"
-                                            className="wishlist-alert-input"
-                                            value={alertValues[item.gameID ?? i] ?? ''}
-                                            onChange={e => setAlertValues(v => ({ ...v, [item.gameID ?? i]: e.target.value }))}
-                                            onKeyDown={e => e.key === 'Enter' && handleSetAlert(item, i)}
-                                            aria-label={`Set price alert for ${item.external ?? item.title}`}
-                                        />
-                                        <button
-                                            className={[
-                                                'wishlist-alert-btn',
-                                                alertStatus[i] === 'saved' ? 'saved' : '',
-                                                alertStatus[i] === 'error' ? 'error' : '',
-                                            ].join(' ').trim()}
-                                            onClick={() => handleSetAlert(item, i)}
-                                            disabled={alertStatus[i] === 'saving'}
-                                            aria-label="Set price alert"
-                                        >
-                                            {alertStatus[i] === 'saving' ? '…'
-                                                : alertStatus[i] === 'saved' ? '✓'
-                                                    : alertStatus[i] === 'error' ? '!'
-                                                        : item.targetPrice ? 'Set New Price' : 'Set'}
-                                        </button>
-                                    </div>
-                                </div>
+                                    <div className="wishlist-item-info">
+                                        <div className="wishlist-item-title">
+                                            {item.external ?? item.title ?? 'Game'}
+                                        </div>
+                                        {item.cheapest && (
+                                            <div className="wishlist-item-price">Best: ${item.cheapest}</div>
+                                        )}
 
-                                <button
-                                    className="wishlist-delete-btn"
-                                    onClick={() => handleDelete(item, i)}
-                                    disabled={deleteStatus[i] === 'deleting'}
-                                    aria-label={`Remove ${item.external ?? item.title} from wishlist`}
-                                >
-                                    {deleteStatus[i] === 'deleting' ? '…' : '🗑'}
-                                </button>
-                            </li>
-                        ))}
+                                        <div className="wishlist-item-alert-row">
+                                            <span className="wishlist-alert-label">
+                                                {hasAlert ? 'Email alert will send at $' : 'Email alert me at $'}
+                                            </span>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                step="0.01"
+                                                placeholder="0.00"
+                                                className="wishlist-alert-input"
+                                                value={alertValues[item.gameID ?? i] ?? ''}
+                                                onChange={e => setAlertValues(v => ({ ...v, [item.gameID ?? i]: e.target.value }))}
+                                                onKeyDown={e => e.key === 'Enter' && handleSetAlert(item, i)}
+                                                aria-label={`Set price alert for ${item.external ?? item.title}`}
+                                            />
+                                            <button
+                                                className={[
+                                                    'wishlist-alert-btn',
+                                                    alertStatus[i] === 'saved' ? 'saved' : '',
+                                                    alertStatus[i] === 'error' ? 'error' : '',
+                                                ].join(' ').trim()}
+                                                onClick={() => handleSetAlert(item, i)}
+                                                disabled={alertStatus[i] === 'saving'}
+                                                aria-label="Set price alert"
+                                            >
+                                                {alertStatus[i] === 'saving' ? '…'
+                                                    : alertStatus[i] === 'saved' ? '✓'
+                                                        : alertStatus[i] === 'error' ? '!'
+                                                            : hasAlert ? 'Set New Price' : 'Set'}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        className="wishlist-delete-btn"
+                                        onClick={() => handleDelete(item, i)}
+                                        disabled={deleteStatus[i] === 'deleting'}
+                                        aria-label={`Remove ${item.external ?? item.title} from wishlist`}
+                                    >
+                                        {deleteStatus[i] === 'deleting' ? '…' : '🗑'}
+                                    </button>
+                                </li>
+                            );
+                        })}
                     </ul>
                 )}
             </div>
