@@ -262,8 +262,26 @@ th, td {
 }
 
 
+/* Spinning loader inside the Add button */
+.add-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(0, 255, 255, 0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: btn-spin 0.6s linear infinite;
+    vertical-align: middle;
+}
+
+@keyframes btn-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
 
 
+/* Wishlist */
 .wishlist-item {
     display: flex;
     align-items: flex-start;
