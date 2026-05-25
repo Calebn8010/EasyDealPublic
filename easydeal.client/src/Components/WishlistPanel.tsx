@@ -20,7 +20,7 @@ interface Props {
 function WishlistPanel({ items, loading, onClose, onDelete, onSetAlert }: Props) {
     const [alertValues, setAlertValues] = useState<Record<string, string>>(() =>
         items.reduce((acc, item) => {
-            if (item.targetPrice && item.gameID) acc[item.gameID] = item.targetPrice;
+            if (item.targetPrice && item.gameID) acc[item.gameID] = parseFloat(item.targetPrice).toFixed(2);
             return acc;
         }, {} as Record<string, string>)
     );
@@ -29,7 +29,7 @@ function WishlistPanel({ items, loading, onClose, onDelete, onSetAlert }: Props)
     // Track which items have had a price successfully set this session
     const [confirmedAlerts, setConfirmedAlerts] = useState<Record<string, string>>(() =>
         items.reduce((acc, item) => {
-            if (item.targetPrice && item.gameID) acc[item.gameID] = item.targetPrice;
+            if (item.targetPrice && item.gameID) acc[item.gameID] = parseFloat(item.targetPrice).toFixed(2);
             return acc;
         }, {} as Record<string, string>)
     );
@@ -44,7 +44,7 @@ function WishlistPanel({ items, loading, onClose, onDelete, onSetAlert }: Props)
         // Sync confirmed alerts when items reload (e.g. panel re-open)
         setConfirmedAlerts(prev => {
             const fromProps = items.reduce((acc, item) => {
-                if (item.targetPrice && item.gameID) acc[item.gameID] = item.targetPrice;
+                if (item.targetPrice && item.gameID) acc[item.gameID] = parseFloat(item.targetPrice).toFixed(2);
                 return acc;
             }, {} as Record<string, string>);
             return { ...prev, ...fromProps };
@@ -70,7 +70,9 @@ function WishlistPanel({ items, loading, onClose, onDelete, onSetAlert }: Props)
             await onSetAlert?.(item, index, amount);
             // Optimistically update confirmed alerts so label/button swap immediately
             if (item.gameID) {
-                setConfirmedAlerts(prev => ({ ...prev, [item.gameID!]: amount }));
+                setConfirmedAlerts(prev => ({ ...prev, [item.gameID!]: parseFloat(amount).toFixed(2) }));
+                // Reset the input back to empty after successful save
+                setAlertValues(v => ({ ...v, [item.gameID!]: '' }));
             }
             setAlertStatus(s => ({ ...s, [index]: 'saved' }));
             setTimeout(() => setAlertStatus(s => ({ ...s, [index]: 'idle' })), 2000);
@@ -117,7 +119,11 @@ function WishlistPanel({ items, loading, onClose, onDelete, onSetAlert }: Props)
 
                                         <div className="wishlist-item-alert-row">
                                             <span className="wishlist-alert-label">
-                                                {hasAlert ? 'Email alert will send at $' : 'Email alert me at $'}
+                                                {hasAlert ? (
+                                                    <>
+                                                        Email alert will send at <span className="wishlist-alert-price">${confirmedAlerts[item.gameID!]}</span>
+                                                    </>
+                                                ) : 'Email alert me at $'}
                                             </span>
                                             <input
                                                 type="number"

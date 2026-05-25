@@ -306,6 +306,11 @@ th, td {
     white-space: nowrap;
 }
 
+.wishlist-alert-price {
+    color: #22c55e;
+    font-weight: 600;
+}
+
 .wishlist-alert-input {
     width: 64px;
     padding: 3px 6px;
