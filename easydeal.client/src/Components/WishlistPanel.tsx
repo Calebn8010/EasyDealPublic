@@ -26,7 +26,6 @@ function WishlistPanel({ items, loading, onClose, onDelete, onSetAlert }: Props)
     );
     const [alertStatus, setAlertStatus] = useState<Record<number, 'idle' | 'saving' | 'saved' | 'error'>>({});
     const [deleteStatus, setDeleteStatus] = useState<Record<number, 'idle' | 'deleting'>>({});
-    // Track which items have had a price successfully set this session
     const [confirmedAlerts, setConfirmedAlerts] = useState<Record<string, string>>(() =>
         items.reduce((acc, item) => {
             if (item.targetPrice && item.gameID) acc[item.gameID] = parseFloat(item.targetPrice).toFixed(2);
@@ -41,7 +40,6 @@ function WishlistPanel({ items, loading, onClose, onDelete, onSetAlert }: Props)
                 return acc;
             }, {} as Record<string, string>)
         );
-        // Sync confirmed alerts when items reload (e.g. panel re-open)
         setConfirmedAlerts(prev => {
             const fromProps = items.reduce((acc, item) => {
                 if (item.targetPrice && item.gameID) acc[item.gameID] = parseFloat(item.targetPrice).toFixed(2);
@@ -68,10 +66,8 @@ function WishlistPanel({ items, loading, onClose, onDelete, onSetAlert }: Props)
         setAlertStatus(s => ({ ...s, [index]: 'saving' }));
         try {
             await onSetAlert?.(item, index, amount);
-            // Optimistically update confirmed alerts so label/button swap immediately
             if (item.gameID) {
                 setConfirmedAlerts(prev => ({ ...prev, [item.gameID!]: parseFloat(amount).toFixed(2) }));
-                // Reset the input back to empty after successful save
                 setAlertValues(v => ({ ...v, [item.gameID!]: '' }));
             }
             setAlertStatus(s => ({ ...s, [index]: 'saved' }));
@@ -87,7 +83,15 @@ function WishlistPanel({ items, loading, onClose, onDelete, onSetAlert }: Props)
             <div className="wishlist-backdrop" onClick={onClose} />
             <div className="wishlist-panel">
                 <div className="wishlist-header">
-                    <h2 className="wishlist-title">❤️ My Wishlist</h2>
+                    <div className="wishlist-title-group">
+                        <h2 className="wishlist-title">❤️ My Wishlist</h2>
+                        <div className="wishlist-info-tooltip">
+                            <span className="wishlist-info-icon" aria-label="Wishlist info">ℹ</span>
+                            <div className="wishlist-info-popup" role="tooltip">
+                                Once an alert price is set. Whenever a new Steam game deal is available below your set alert price, you'll receive an email with a link to the game deal.
+                            </div>
+                        </div>
+                    </div>
                     <button className="wishlist-close-btn" onClick={onClose} aria-label="Close wishlist">
                         ×
                     </button>
@@ -100,7 +104,6 @@ function WishlistPanel({ items, loading, onClose, onDelete, onSetAlert }: Props)
                 ) : (
                     <ul className="wishlist-list">
                         {items.map((item, i) => {
-                            // Use local confirmed state instead of item.targetPrice for display
                             const hasAlert = !!(item.gameID && confirmedAlerts[item.gameID]);
 
                             return (
