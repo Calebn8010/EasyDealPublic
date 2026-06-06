@@ -446,3 +446,55 @@ th, td {
     visibility: visible;
     opacity: 1;
 }
+
+
+
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+    }
+
+    body {
+        background-color: #121212;
+        color: #f0f0f0;
+    }
+
+    .containerbox {
+        background-color: #1e1e1e;
+        color: #f0f0f0;
+        box-shadow: 5px 5px 10px #000;
+    }
+
+    .navbar {
+        background: #1e1e1e;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .navbar-user {
+        color: #d1d5db;
+    }
+
+    tr:nth-child(even) {
+        background: #2a2a2a;
+    }
+
+    tr:nth-child(odd) {
+        background: #1e1e1e;
+    }
+
+    .wishlist-panel {
+        background: #1e1e1e;
+        color: #f0f0f0;
+    }
+
+    .wishlist-item {
+        background: #2a2a2a;
+    }
+
+    input {
+        background-color: #2a2a2a;
+        color: #f0f0f0;
+        border: 1px solid #555;
+    }
+}
