@@ -1,16 +1,6 @@
 ﻿import { useState } from 'react';
+import type { Deal, DealInfo } from '../Utils/types.ts';
 
-interface Deal {
-    thumb: string;
-    external?: string;
-    cheapest?: string;
-    cheapestDealID: string;
-    gameID: string;
-}
-interface DealInfo {
-    cheapestPriceEver: string;
-    date: string;
-}
 
 type AddStatus = 'idle' | 'loading' | 'added' | 'duplicate' | 'error';
 
