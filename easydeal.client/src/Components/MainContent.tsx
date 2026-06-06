@@ -1,25 +1,14 @@
 import SearchForm from "./DealSearch.tsx";
 import DealList from "./DealList.tsx";
+import type { Deal, DealInfo } from '../Utils/types.ts';
 
-export interface Deal {
-    thumb: string;
-    external?: string;
-    cheapest?: string;
-    cheapestDealID: string;
-    gameID: string;
-}
 
-interface DealInfo {
-    cheapestPriceEver: string;
-    date: string;
-}
-
-interface Props {
+export interface Props {
     deals: Deal[];
     expandedIdx: number | null;
     dealInfo: DealInfo | null;
     onSearch: (query: string) => void;
-    onAdd: (deal: Deal) => void;
+    onAdd: (deal: Deal) => Promise<'added' | 'duplicate' | 'error'>;
     onToggleExpand: (idx: number, gameID: string) => void;
 }
 
