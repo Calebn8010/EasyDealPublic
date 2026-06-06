@@ -4,7 +4,7 @@ import Navbar from "../Components/Navbar.tsx";
 import WishlistPanel from "../Components/WishlistPanel.tsx";
 import MainContent from "../Components/MainContent.tsx";
 import type { WishlistItem } from "../Components/WishlistPanel.tsx";
-import type { Deal } from "../Components/MainContent.tsx"
+import type { Deal } from '../Utils/types.ts';
 
 function Home() {
     const [deals, setDeals] = useState<any[]>([]);
