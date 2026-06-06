@@ -262,8 +262,26 @@ th, td {
 }
 
 
+/* Spinning loader inside the Add button */
+.add-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(0, 255, 255, 0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: btn-spin 0.6s linear infinite;
+    vertical-align: middle;
+}
+
+@keyframes btn-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
 
 
+/* Wishlist */
 .wishlist-item {
     display: flex;
     align-items: flex-start;
@@ -286,6 +304,11 @@ th, td {
     font-size: 0.72rem;
     color: #888;
     white-space: nowrap;
+}
+
+.wishlist-alert-price {
+    color: #22c55e;
+    font-weight: 600;
 }
 
 .wishlist-alert-input {
@@ -352,3 +375,74 @@ th, td {
         opacity: 0.4;
         cursor: not-allowed;
     }
+
+/* Wishlist Info */
+.wishlist-title-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.wishlist-info-tooltip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.wishlist-info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1.5px solid #888;
+    color: #888;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 600;
+    cursor: default;
+    line-height: 1;
+    user-select: none;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.wishlist-info-tooltip:hover .wishlist-info-icon {
+    border-color: #555;
+    color: #555;
+}
+
+.wishlist-info-popup {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 220px;
+    background: #2a2a2a;
+    color: #f0f0f0;
+    font-size: 12px;
+    line-height: 1.5;
+    padding: 8px 10px;
+    border-radius: 6px;
+    z-index: 100;
+    transition: opacity 0.15s;
+}
+
+    .wishlist-info-popup::before {
+        content: '';
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 5px solid transparent;
+        border-bottom-color: #2a2a2a;
+    }
+
+.wishlist-info-tooltip:hover .wishlist-info-popup {
+    visibility: visible;
+    opacity: 1;
+}

@@ -36,20 +36,23 @@ function Home() {
         setTimeout(() => document.body.removeChild(notification), duration);
     }
 
-    async function handleAdd(deal: Deal) {
-        const response = await fetch('wishlistupdates', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(deal)
-        });
-        if (response.status === 409) {
-            showNotification('Game already in your Wishlist ✓', '#facc15', 6000);
-        } else if (response.status === 200) {
-            showNotification(`Added to Wishlist ✓ ${deal?.external}`, '#22c55e', 3500);
-        } else {
-            showNotification('Add to Wishlist unsuccessful, please try again later.', '#ef4444', 3500);
-        }
+    async function handleAdd(deal: Deal): Promise<'added' | 'duplicate' | 'error'> {
+    const response = await fetch('wishlistupdates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(deal)
+    });
+    if (response.status === 409) {
+        showNotification('Game already in your Wishlist ✓', '#facc15', 6000);
+        return 'duplicate';
+    } else if (response.status === 200) {
+        showNotification(`Added to Wishlist ✓ ${deal?.external}`, '#22c55e', 3500);
+        return 'added';
+    } else {
+        showNotification('Add to Wishlist unsuccessful, please try again later.', '#ef4444', 3500);
+        return 'error';
     }
+}
 
     async function toggleExpand(idx: number, gameID: string) {
         setExpandedIdx(expandedIdx === idx ? null : idx);
