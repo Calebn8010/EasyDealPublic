@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import GameBackground from "../Components/GameBackground";
 
 
 function Register() {
@@ -68,7 +69,9 @@ function Register() {
     };
 
     return (
-        <div className="containerbox">
+        <>
+        <GameBackground />
+            <div className="containerbox" style={{ position: "relative", zIndex: 1 }}>
             <h3>Register</h3>
 
             <form onSubmit={handleSubmit}>
@@ -114,6 +117,7 @@ function Register() {
 
             {error && <p className="error">{error}</p>}
         </div>
+        </>
     );
 }
 
