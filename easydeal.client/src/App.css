@@ -498,3 +498,158 @@ th, td {
         border: 1px solid #555;
     }
 }
+
+/* ── Landing page ── */
+.landing {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 3rem 1.5rem;
+    gap: 2rem;
+}
+
+.landing-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.7;
+}
+
+    .landing-brand i {
+        font-size: 22px;
+        color: #60a5fa;
+    }
+
+.landing-hero {
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+    .landing-hero h1 {
+        font-size: clamp(2rem, 5vw, 3rem);
+        font-weight: 700;
+        line-height: 1.2;
+        margin: 0;
+    }
+
+    .landing-hero p {
+        font-size: 1rem;
+        line-height: 1.7;
+        opacity: 0.65;
+        margin: 0;
+    }
+
+/* ── Buttons ── */
+.landing-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity 0.15s ease, border-color 0.15s ease;
+    border: 1px solid transparent;
+}
+
+.btn-primary {
+    background: white;
+    color: black;
+}
+
+    .btn-primary:hover {
+        opacity: 0.85;
+    }
+
+.btn-outline {
+    background: transparent;
+    color: white;
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+    .btn-outline:hover {
+        border-color: rgba(255, 255, 255, 0.7);
+    }
+
+.btn-ghost {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.45);
+    font-weight: 400;
+}
+
+    .btn-ghost:hover {
+        color: white;
+    }
+
+/* ── Feature strip ── */
+.landing-features {
+    display: flex;
+    gap: 3rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+
+.feature {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+    .feature i {
+        font-size: 24px;
+        color: #60a5fa;
+        margin-bottom: 2px;
+    }
+
+.feature-title {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.feature-desc {
+    font-size: 13px;
+    opacity: 0.5;
+}
+
+/* ── Footer ── */
+.landing-footer {
+    margin-top: 0.5rem;
+}
+
+    .landing-footer small {
+        font-size: 12px;
+        opacity: 0.3;
+    }
+.landing {
+    position: relative; /* add this */
+    z-index: 1; /* add this */
+    /* your existing styles stay the same below */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 3rem 1.5rem;
+    gap: 2rem;
+}
