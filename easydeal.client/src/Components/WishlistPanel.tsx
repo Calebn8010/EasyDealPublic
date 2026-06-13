@@ -88,7 +88,9 @@ function WishlistPanel({ items, loading, onClose, onDelete, onSetAlert }: Props)
                         <div className="wishlist-info-tooltip">
                             <span className="wishlist-info-icon" aria-label="Wishlist info">ℹ</span>
                             <div className="wishlist-info-popup" role="tooltip">
-                                Once an alert price is set. Whenever a new Steam game deal is available below your set alert price, you'll receive an email with a link to the game deal.
+                                <p>Once an alert price is set. Whenever a new Steam game deal is available below your set alert price, you'll receive an email with a link to the game deal</p>
+
+                                <p>Price alerts will be sent to your EasyDeal registered email. For gmail accounts you might need to add a filter for any emails from "no-reply@cheapshark.com" as your price alert emails may end up outsite of the default main inbox.</p>
                             </div>
                         </div>
                     </div>
