@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import GameBackground from "../Components/GameBackground";
 
 function Login() {
     // state variables for email and passwords
@@ -55,7 +56,7 @@ function Login() {
                     console.log(data);
                     if (data.ok) {
                         setError("Successful Login.");
-                        window.location.href = '/';
+                        window.location.href = '/home';
                     }
                     else
                         setError("Error Logging In.");
@@ -70,7 +71,9 @@ function Login() {
     };
 
     return (
-        <div className="containerbox">
+        <>
+            <GameBackground />
+            <div className="containerbox" style={{ position: "relative", zIndex: 1 }}>
             <h3>Login</h3>
             <form onSubmit={handleSubmit}>
                 <div>
@@ -113,7 +116,8 @@ function Login() {
                 </div>
             </form>
             {error && <p className="error">{error}</p>}
-        </div>
+            </div>
+        </>
     );
 }
 
