@@ -56,7 +56,7 @@ function Login() {
                     console.log(data);
                     if (data.ok) {
                         setError("Successful Login.");
-                        window.location.href = '/';
+                        window.location.href = '/home';
                     }
                     else
                         setError("Error Logging In.");
