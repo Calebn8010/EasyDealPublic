@@ -5,6 +5,7 @@ import Landing from './Pages/Landing.tsx';
 import Home from './Pages/Home.tsx';
 import Login from './Pages/Login.tsx';
 import Register from './Pages/Register.tsx';
+import ConfirmEmail from './Pages/ConfirmEmail';
 
 function App() {
     return (
@@ -15,6 +16,7 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/home" element={<Home />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="/confirm-email" element={<ConfirmEmail />} />
             </Routes>
         </BrowserRouter>
     );
