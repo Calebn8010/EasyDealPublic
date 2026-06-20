@@ -49,7 +49,7 @@ function Register() {
                 .then(async (response) => {
                     const data = await response.json();
                     if (response.ok) {
-                        setSuccess("Registration successful! Please check your email to confirm your account.");
+                        setSuccess("Registration successful! Please check your email to confirm your account. May need to check your spam folder or search inbox for easydealv2@gmail.com");
                     } else {
                         setError(data.message ?? "Error registering.");
                     }
