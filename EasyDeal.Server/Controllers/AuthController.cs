@@ -67,10 +67,26 @@ public class AuthController : ControllerBase
         var result = await _userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
         {
+            // Check specifically for duplicate email before generic errors
+            var isDuplicate = result.Errors.Any(e =>
+                e.Code == "DuplicateUserName" || e.Code == "DuplicateEmail");
+
+            if (isDuplicate)
+                return Conflict(new { message = "An account with this email already exists. Please log in instead." });
+
+            // Check for password validation failures
+            var passwordErrors = result.Errors
+                .Where(e => e.Code.StartsWith("Password"))
+                .Select(e => e.Description)
+                .ToList();
+
+            if (passwordErrors.Any())
+                return BadRequest(new { message = string.Join(" ", passwordErrors) });
+
             var errors = result.Errors.Select(e => new { e.Code, e.Description });
             return BadRequest(new { errors });
         }
-            
+
 
         Console.WriteLine("Make it to register 2");
 
@@ -127,7 +143,7 @@ public class AuthController : ControllerBase
             $"<p>New confirmation link: <a href='{confirmLink}'>Confirm Email</a></p>"
         );
 
-        return Ok(new { message = "If that email exists and is unconfirmed, a new link has been sent." });
+        return Ok(new { message = "If that email exists and is unconfirmed, a new link has been sent. Please check your email to confirm your account. You may need to check your spam folder or search inbox for easydealv2@gmail.com" });
     }
 }
 public record AuthLoginRequest(string Email, string Password);

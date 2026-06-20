@@ -50,10 +50,12 @@ function Register() {
                 .then(async (response) => {
                     const data = await response.json();
                     console.log(data.errors)
-                    if (response.ok) {
+                    if (response.status === 409) {
+                        setError(data.message);  // "An account with this email already exists..."
+                    } else if (response.ok) {
                         setSuccess("Registration successful! Please check your email to confirm your account. You may need to check your spam folder or search inbox for easydealv2@gmail.com");
                     } else {
-                        setError(data.message ??  "Passwords must be at least 6 characters. Must have at least one non alphanumeric character. Must have at least one digit ('0'-'9'). Must have at least one uppercase ('A'-'Z').");
+                        setError(data.message ??  "Error registering.");
                     }
                 })
                 .catch((error) => {
