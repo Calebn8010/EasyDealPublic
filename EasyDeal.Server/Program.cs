@@ -23,7 +23,8 @@ namespace EasyDeal.Server.Data
 
             // Add in addtional api endpoints for React front end
             builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddSignInManager();
 
 
 
