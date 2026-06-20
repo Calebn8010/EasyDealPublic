@@ -1,6 +1,7 @@
 ﻿import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import GameBackground from "../Components/GameBackground";
+import ErrorPopup from "../Components/ErrorPopup"
 
 function Register() {
     const [email, setEmail] = useState("");
@@ -48,10 +49,11 @@ function Register() {
             })
                 .then(async (response) => {
                     const data = await response.json();
+                    console.log(data.errors)
                     if (response.ok) {
-                        setSuccess("Registration successful! Please check your email to confirm your account. May need to check your spam folder or search inbox for easydealv2@gmail.com");
+                        setSuccess("Registration successful! Please check your email to confirm your account. You may need to check your spam folder or search inbox for easydealv2@gmail.com");
                     } else {
-                        setError(data.message ?? "Error registering.");
+                        setError(data.message ??  "Passwords must be at least 6 characters. Must have at least one non alphanumeric character. Must have at least one digit ('0'-'9'). Must have at least one uppercase ('A'-'Z').");
                     }
                 })
                 .catch((error) => {
@@ -121,7 +123,7 @@ function Register() {
                     </div>
                 )}
 
-                {error && <p className="error">{error}</p>}
+                {error && <ErrorPopup message={error} onClose={() => setError("")} />}
             </div>
         </>
     );

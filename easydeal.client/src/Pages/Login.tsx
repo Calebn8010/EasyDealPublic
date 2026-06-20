@@ -1,12 +1,15 @@
 ﻿import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import GameBackground from "../Components/GameBackground";
+import ErrorPopup from "../Components/ErrorPopup";
 
 function Login() {
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [rememberme, setRememberme] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
+    const [showResend, setShowResend] = useState<boolean>(false);  
+    const [resendStatus, setResendStatus] = useState<string>("");  
     const navigate = useNavigate();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -20,6 +23,23 @@ function Login() {
         navigate("/register");
     };
 
+    const handleResendConfirmation = () => {
+        setResendStatus("Sending...");
+        fetch("/api/auth/resend-confirmation", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                email,
+                clientBaseUrl: window.location.origin
+            }),
+        })
+            .then(async (res) => {
+                const data = await res.json();
+                setResendStatus(data.message ?? "Confirmation email sent.");
+            })
+            .catch(() => setResendStatus("Failed to resend. Please try again."));
+    };
+
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
@@ -29,6 +49,8 @@ function Login() {
         }
 
         setError("");
+        setShowResend(false); 
+        setResendStatus(""); 
 
         fetch("/api/auth/login", {
             method: "POST",
@@ -39,12 +61,14 @@ function Login() {
                 const data = await response.json();
 
                 if (!response.ok) {
-                    // Shows the specific message from the server e.g. "Please confirm your email..."
                     setError(data.message ?? "Error Logging In.");
+                    // Show resend button only for unconfirmed email error
+                    if (data.message?.includes("confirm your email")) {
+                        setShowResend(true);
+                    }
                     return;
                 }
 
-                // If confirmed and password valid, cookie login
                 const loginUrl = rememberme
                     ? "/login?useCookies=true"
                     : "/login?useSessionCookies=true";
@@ -56,7 +80,7 @@ function Login() {
                 });
             })
             .then((cookieResponse) => {
-                if (!cookieResponse) return; 
+                if (!cookieResponse) return;
                 if (cookieResponse.ok) {
                     window.location.href = "/home";
                 } else {
@@ -115,7 +139,24 @@ function Login() {
                         <button type="button" onClick={handleRegisterClick}>Register</button>
                     </div>
                 </form>
-                {error && <p className="error">{error}</p>}
+
+                {/*Resend confirmation banner — only shows after unconfirmed email error */}
+                {showResend && (
+                    <div className="resend-banner">
+                        <span className="resend-icon">ℹ️</span>
+                        <span className="resend-text">Didn't get the confirmation email?</span>
+                        <button
+                            className="resend-button"
+                            onClick={handleResendConfirmation}
+                            type="button"
+                        >
+                            Resend Email
+                        </button>
+                        {resendStatus && <p className="resend-status">{resendStatus}</p>}
+                    </div>
+                )}
+
+                {error && <ErrorPopup message={error} onClose={() => setError("")} />}
             </div>
         </>
     );
