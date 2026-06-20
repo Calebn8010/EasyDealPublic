@@ -12,12 +12,46 @@ namespace EasyDeal.Server.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;  
     private readonly IEmailSender _emailSender;
 
-    public AuthController(UserManager<ApplicationUser> userManager, IEmailSender emailSender)
+    // Update the constructor:
+    public AuthController(
+        UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager, 
+        IEmailSender emailSender)
     {
         _userManager = userManager;
+        _signInManager = signInManager; 
         _emailSender = emailSender;
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] AuthLoginRequest request)
+    {
+        // Find user by email
+        var user = await _userManager.FindByEmailAsync(request.Email);
+        if (user == null)
+            return Unauthorized(new { message = "Invalid email or password." });
+
+        // Check email is confirmed before allowing login
+        if (!await _userManager.IsEmailConfirmedAsync(user))
+            return Unauthorized(new { message = "Please confirm your email before logging in. Check your inbox for a confirmation link." });
+
+        // Validate password
+        var passwordValid = await _userManager.CheckPasswordAsync(user, request.Password);
+        if (!passwordValid)
+            return Unauthorized(new { message = "Invalid email or password." });
+
+        // Sign the user in
+        var signInResult = await _signInManager.PasswordSignInAsync(
+            user, request.Password, isPersistent: false, lockoutOnFailure: true);
+
+        if (signInResult.Succeeded)
+            return Ok(new { message = "Login successful." });
+
+
+        return Unauthorized(new { message = "Invalid email or password." });
     }
 
     [HttpPost("register")]
@@ -32,7 +66,11 @@ public class AuthController : ControllerBase
         Console.WriteLine("Make it to register 1");
         var result = await _userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
-            return BadRequest(result.Errors);
+        {
+            var errors = result.Errors.Select(e => new { e.Code, e.Description });
+            return BadRequest(new { errors });
+        }
+            
 
         Console.WriteLine("Make it to register 2");
 
@@ -92,7 +130,7 @@ public class AuthController : ControllerBase
         return Ok(new { message = "If that email exists and is unconfirmed, a new link has been sent." });
     }
 }
-
+public record AuthLoginRequest(string Email, string Password);
 public record AuthRegisterRequest(string Email, string Password, string ClientBaseUrl);
 public record AuthConfirmEmailRequest(string UserId, string Token);
 public record AuthResendRequest(string Email, string ClientBaseUrl);
