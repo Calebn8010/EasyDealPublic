@@ -69,6 +69,10 @@ export default defineConfig({
                 target,
                 secure: false
             },
+            '^/api': {
+                target,
+                secure: false
+            },
             '^/login': {
                 target,
                 secure: false
