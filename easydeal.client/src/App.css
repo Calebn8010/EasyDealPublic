@@ -24,6 +24,11 @@ th, td {
     background-color: white;
     padding: 20px;
     text-align: left;
+    width: fit-content;
+    min-width: 300px;
+    max-width: 100%; 
+    box-sizing: border-box; 
+    margin: 0 auto; /* centers it */
 }
 
 .search {

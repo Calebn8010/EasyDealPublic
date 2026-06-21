@@ -1,4 +1,4 @@
-:root {
+﻿:root {
     font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
     font-weight: 400;
@@ -67,5 +67,108 @@ button {
 
     button {
         background-color: #f9f9f9;
+    }
+}
+
+/* ── Mobile Responsive Fixes ── */
+@media (max-width: 768px) {
+
+    /* Fix body layout on mobile */
+    body {
+        display: block;
+        place-items: unset;
+    }
+
+    /* Fix root padding on mobile */
+    #root {
+        padding: 1rem;
+        max-width: 100%;
+    }
+
+    /* Login/Register container — center and fit mobile */
+    .containerbox {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        margin: 0 auto;
+    }
+
+    /* Make inputs full width on mobile */
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Game list items — stack vertically on mobile */
+    .list-item {
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 0.75rem;
+    }
+
+    .deal-img {
+        max-width: 100px;
+        max-height: 100px;
+        border-radius: 8px;
+    }
+
+    .list-item-values {
+        margin-right: 0;
+        width: 100%;
+    }
+
+    /* Actions row — spread across bottom */
+    .actions {
+        width: 100%;
+        justify-content: flex-end;
+        margin-left: 0;
+    }
+
+    /* Navbar adjustments */
+    .navbar {
+        padding: 8px 12px;
+        gap: 8px;
+    }
+
+    .navbar-user {
+        font-size: 0.75rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 160px;
+    }
+
+    .wishlist-btn {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+
+    /* Wishlist panel full width on mobile */
+    .wishlist-panel {
+        max-width: 100%;
+    }
+
+    /* Search bar */
+    .search {
+        margin: 0.5rem 0;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Drop down button */
+    .drop-down {
+        margin-left: auto;
+    }
+
+    /* Resend banner */
+    .resend-banner {
+        flex-wrap: wrap;
+        font-size: 0.75rem;
+    }
+
+    .resend-text {
+        white-space: normal;
     }
 }
