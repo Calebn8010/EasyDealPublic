@@ -35,7 +35,10 @@ function Login() {
         })
             .then(async (res) => {
                 const data = await res.json();
-                setResendStatus(data.message ?? "Confirmation email sent.");
+                // Use error popup for the status instead of inline text
+                setResendStatus("");
+                setError(`Confirmation email sent to ${email}. Check your inbox and spam folder.`);
+                setShowResend(false);
             })
             .catch(() => setResendStatus("Failed to resend. Please try again."));
     };
@@ -150,9 +153,8 @@ function Login() {
                             onClick={handleResendConfirmation}
                             type="button"
                         >
-                            Resend Email
+                            {resendStatus === "Sending..." ? "Sending..." : "Resend Email"}
                         </button>
-                        {resendStatus && <p className="resend-status">{resendStatus}</p>}
                     </div>
                 )}
 

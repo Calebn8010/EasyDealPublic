@@ -1,4 +1,4 @@
-:root {
+﻿:root {
     font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
     font-weight: 400;
@@ -67,5 +67,121 @@ button {
 
     button {
         background-color: #f9f9f9;
+    }
+}
+
+/* ── Mobile Responsive Fixes ── */
+@media (max-width: 768px) {
+
+    /* Fix body layout on mobile */
+    body {
+        display: block;
+        place-items: unset;
+    }
+
+    /* Fix root padding on mobile */
+    #root {
+        padding: 1rem;
+        max-width: 100%;
+    }
+
+    /* Login/Register container — center and fit mobile */
+    .containerbox {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        margin: 0 auto;
+    }
+
+    /* Make inputs full width on mobile */
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Game list items — stack vertically on mobile */
+    .list-item {
+        flex-direction: row; /* Back to row */
+        flex-wrap: wrap; /* Allows price/buttons to wrap below */
+        gap: 0.5rem;
+        padding: 0.75rem;
+        align-items: center;
+    }
+
+    .deal-img {
+        width: 70px;
+        height: auto; /* Scales naturally */
+        max-width: 70px;
+        max-height: none; /* Remove height cap */
+        border-radius: 6px;
+        flex-shrink: 0;
+        object-fit: unset; /* Let the image just be itself */
+        background-color: unset;
+        align-self: center;
+    }
+
+    .list-item-values {
+        flex: 1; /* Takes remaining space next to image */
+        margin-right: 0;
+        min-width: 0;
+        font-size: 0.85rem;
+    }
+
+    /* Actions row — spread across bottom */
+    .actions {
+        width: 100%; /* Sits on its own row below */
+        justify-content: flex-end;
+        margin-left: 0;
+        margin-top: 0.25rem;
+        border-top: 1px solid rgba(255,255,255,0.08);
+        padding-top: 0.4rem;
+    }
+
+    /* Navbar adjustments */
+    .navbar {
+        padding: 8px 12px;
+        gap: 8px;
+    }
+
+    .navbar-user {
+        font-size: 0.75rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 160px;
+    }
+
+    .wishlist-btn {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+
+    /* Wishlist panel full width on mobile */
+    .wishlist-panel {
+        max-width: 100%;
+    }
+
+    /* Search bar */
+    .search {
+        margin: 0.5rem 0;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Drop down button */
+    .drop-down {
+        margin-left: auto;
+    }
+
+    /* Resend banner */
+    .resend-banner {
+        flex-wrap: wrap;
+        font-size: 0.75rem;
+    }
+
+    .resend-text {
+        white-space: normal;
     }
 }
