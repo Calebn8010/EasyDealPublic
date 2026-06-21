@@ -33,9 +33,7 @@ function Login() {
                 clientBaseUrl: window.location.origin
             }),
         })
-            .then(async (res) => {
-                const data = await res.json();
-                // Use error popup for the status instead of inline text
+            .then(() => {
                 setResendStatus("");
                 setError(`Confirmation email sent to ${email}. Check your inbox and spam folder.`);
                 setShowResend(false);
