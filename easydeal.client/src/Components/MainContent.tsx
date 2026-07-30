@@ -7,7 +7,7 @@ export interface Props {
     deals: Deal[];
     expandedIdx: number | null;
     dealInfo: DealInfo | null;
-    onSearch: (query: string) => Promise<void>;
+    onSearch: (query: string) => void;
     onAdd: (deal: Deal) => Promise<'added' | 'duplicate' | 'error'>;
     onToggleExpand: (idx: number, gameID: string) => void;
 }
