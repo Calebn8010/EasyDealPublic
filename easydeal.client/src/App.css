@@ -176,7 +176,7 @@ th, td {
     overflow-y: auto;
     background: #fff;
     box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
-    padding: 24px 20px;
+    padding: 24px 20px 48px 20px; /* ← change bottom from 24px to 48px */
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -210,7 +210,7 @@ th, td {
 .wishlist-list {
     list-style: none;
     margin: 0;
-    padding: 0;
+    padding: 0 0 24px 0; /* ← add bottom padding here too */
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -242,6 +242,8 @@ th, td {
     font-size: 0.8rem;
     font-weight: 500;
 }
+
+
 
 /* ── Main Content ── */
 .main-content {
