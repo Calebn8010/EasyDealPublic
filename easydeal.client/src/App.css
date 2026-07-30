@@ -638,7 +638,7 @@ th, td {
 
     .landing-footer small {
         font-size: 12px;
-        opacity: 0.6;
+        opacity: 0.3;
     }
 .landing {
     position: relative; /* add this */
