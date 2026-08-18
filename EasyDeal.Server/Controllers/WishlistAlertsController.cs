@@ -13,11 +13,13 @@ namespace EasyDeal.Server.Controllers
     {
         private readonly ILogger<WishlistAlertsController> _logger;
         private readonly ApplicationDbContext _context;
+        private readonly CheapSharkApiRequests _cheapShark;
 
-        public WishlistAlertsController(ILogger<WishlistAlertsController> logger, ApplicationDbContext context)
+        public WishlistAlertsController(ILogger<WishlistAlertsController> logger, ApplicationDbContext context, CheapSharkApiRequests cheapSharkApiRequests)
         {
             _logger = logger;
             _context = context;
+            _cheapShark = cheapSharkApiRequests;
         }
 
         public enum WishlistAlertResult
@@ -73,7 +75,7 @@ namespace EasyDeal.Server.Controllers
         private async Task<SetAlertResult> SetCheapSharkAlert(WishlistGameAlert game, string userid, string email)
         {
             _logger.LogInformation($"------------------------");
-            SetAlertResult result = await CheapSharkApiRequests.SetAlert(game.gameId, email, game.targetPrice, _logger, EmailAlertAction.Set);
+            SetAlertResult result = await _cheapShark.SetAlert(game.gameId, email, game.targetPrice, _logger, EmailAlertAction.Set);
             _logger.LogInformation($"------------------------");
 
             return result;

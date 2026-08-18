@@ -10,10 +10,12 @@ namespace EasyDeal.Server.Controllers
     public class BestDealInfoController : ControllerBase
     {
         private readonly ILogger<BestDealInfoController> _logger;
+        private readonly CheapSharkApiRequests _cheapShark;
 
-        public BestDealInfoController(ILogger<BestDealInfoController> logger)
+        public BestDealInfoController(ILogger<BestDealInfoController> logger, CheapSharkApiRequests cheapSharkApiRequests)
         {
             _logger = logger;
+            _cheapShark = cheapSharkApiRequests;
         }
 
         // Handles Post request from front end for BestDealInfo endpoint
@@ -23,7 +25,7 @@ namespace EasyDeal.Server.Controllers
             _logger.LogInformation("BestDealInfoController Post method called.");
             
             // Fetch the list of game deals based on the query
-            var dealInfo = await CheapSharkApiRequests.GameInfoById(request.gameID, _logger);
+            var dealInfo = await _cheapShark.GameInfoById(request.gameID, _logger);
             
             return Ok(dealInfo); // Serialize detailed deal info to JSON
         }
