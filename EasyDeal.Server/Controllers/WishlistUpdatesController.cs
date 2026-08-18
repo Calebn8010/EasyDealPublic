@@ -13,11 +13,14 @@ namespace EasyDeal.Server.Controllers
     {
         private readonly ILogger<WishlistUpdatesController> _logger;
         private readonly ApplicationDbContext _context;
+        private readonly CheapSharkApiRequests _cheapShark;
 
-        public WishlistUpdatesController(ILogger<WishlistUpdatesController> logger, ApplicationDbContext context)
+        public WishlistUpdatesController(ILogger<WishlistUpdatesController> logger, ApplicationDbContext context, CheapSharkApiRequests cheapSharkApiRequests)
         {
             _logger = logger;
             _context = context;
+            _cheapShark = cheapSharkApiRequests;
+
         }
 
         public enum WishlistResult
@@ -209,7 +212,7 @@ namespace EasyDeal.Server.Controllers
 
             // Remove from Cheapshark api
             _logger.LogInformation($"------------------------deleting");
-            SetAlertResult api_result = await CheapSharkApiRequests.SetAlert(item.gameID, user_email, "0", _logger, EmailAlertAction.Delete);
+            SetAlertResult api_result = await _cheapShark.SetAlert(item.gameID, user_email, "0", _logger, EmailAlertAction.Delete);
             _logger.LogInformation($"------------------------");
 
             if (api_result != SetAlertResult.Success)

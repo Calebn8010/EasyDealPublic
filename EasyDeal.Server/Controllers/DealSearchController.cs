@@ -10,10 +10,12 @@ namespace EasyDeal.Server.Controllers
     public class DealSearchController : ControllerBase
     {
         private readonly ILogger<DealSearchController> _logger;
+        private readonly CheapSharkApiRequests _cheapShark;
 
-        public DealSearchController(ILogger<DealSearchController> logger)
+        public DealSearchController(ILogger<DealSearchController> logger, CheapSharkApiRequests cheapSharkApiRequests)
         {
             _logger = logger;
+            _cheapShark = cheapSharkApiRequests;
         }
 
 
@@ -24,7 +26,7 @@ namespace EasyDeal.Server.Controllers
             _logger.LogInformation("DealSearchController Post method called.");
             _logger.LogInformation($"Received query: {request?.query}");
             //var deals = await GetGameListRequest(request.Query);
-            var deals = await CheapSharkApiRequests.GetGameList(request.query, _logger);
+            var deals = await _cheapShark.GetGameList(request.query, _logger);
 
             //Testing new request function / git test
             //Console.WriteLine(deals[0].cheapestDealID);

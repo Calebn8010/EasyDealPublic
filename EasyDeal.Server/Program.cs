@@ -1,5 +1,6 @@
+
+using EasyDeal.Server.Controllers;
 using EasyDeal.Server.Data;
-using EasyDeal.Server.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,21 @@ namespace EasyDeal.Server.Data
             
 
             var builder = WebApplication.CreateBuilder(args);
+
+            // Add in for azure logging
+            builder.Logging.AddAzureWebAppDiagnostics();
+
+          
+            builder.Services.AddHttpClient(); 
+
+            // Add client for CheapShark requests                                   
+            builder.Services.AddHttpClient("CheapShark", client =>
+            {
+                client.DefaultRequestHeaders.Add("User-Agent", "EasyDeal/1.0 (easydealv2@gmail.com)");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+
+            builder.Services.AddScoped<CheapSharkApiRequests>();
 
             var connectionString = builder.Configuration.GetConnectionString("ApplicationDbContextConnection") ?? throw new InvalidOperationException("Connection string 'ApplicationDbContextConnection' not found.");
 

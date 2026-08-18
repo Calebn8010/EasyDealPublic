@@ -29,9 +29,11 @@ namespace EasyDeal.Server.Controllers
     public class CheapSharkApiRequests
     {
         private readonly ILogger<CheapSharkApiRequests> _logger;
+        private readonly IHttpClientFactory _httpClientFactory;
 
         // Centralized factory so every HttpClient created here includes the User-Agent header.
 
+        /*
         private static HttpClient CreateHttpClient()
         {
             var client = new HttpClient();
@@ -39,15 +41,23 @@ namespace EasyDeal.Server.Controllers
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36");
             return client;
         }
-
-        public CheapSharkApiRequests(ILogger<CheapSharkApiRequests> logger)
+        */
+        public CheapSharkApiRequests(ILogger<CheapSharkApiRequests> logger, IHttpClientFactory httpClientFactory)
         {
             _logger = logger;
+            _httpClientFactory = httpClientFactory;
+        }
+        private HttpClient CreateHttpClient()
+        {
+            var client = _httpClientFactory.CreateClient("CheapShark");
+            return client;
         }
 
-        public static async Task<List<GameDeal>> GetGameList(string game, ILogger<DealSearchController> logger)
+        
+
+        public async Task<List<GameDeal>> GetGameList(string game, ILogger<DealSearchController> logger)
         {
-            using (HttpClient client = CreateHttpClient())
+            var client = CreateHttpClient();
             {
                 try
                 {
@@ -103,11 +113,11 @@ namespace EasyDeal.Server.Controllers
             }
         }
 
-        public static async Task<BestGameDeal> GameInfoById(string id, ILogger<BestDealInfoController> logger)
+        public async Task<BestGameDeal> GameInfoById(string id, ILogger<BestDealInfoController> logger)
         {
             BestGameDeal bestDeal = new BestGameDeal();
 
-            using (HttpClient client = CreateHttpClient())
+            var client = CreateHttpClient();
             {
                 try
                 {
@@ -155,9 +165,9 @@ namespace EasyDeal.Server.Controllers
             }
         }
 
-        public static async Task GetDealInfo(string id)
+        public async Task GetDealInfo(string id)
         {
-            using (HttpClient client = CreateHttpClient())
+            var client = CreateHttpClient();
             {
                 try
                 {
@@ -233,9 +243,9 @@ namespace EasyDeal.Server.Controllers
         }
 
 
-        public static async Task<SetAlertResult> SetAlert(string gameId, string email, string price, ILogger logger, EmailAlertAction action_type)
+        public async Task<SetAlertResult> SetAlert(string gameId, string email, string price, ILogger logger, EmailAlertAction action_type)
         {
-            using (HttpClient client = CreateHttpClient())
+            var client = CreateHttpClient();
             {
                 try
                 {
@@ -296,9 +306,9 @@ namespace EasyDeal.Server.Controllers
         }
 
         
-        public static async Task GetRequestIdOld(string id)
+        public async Task GetRequestIdOld(string id)
         {
-            using (HttpClient client = CreateHttpClient())
+            var client = CreateHttpClient();
             {
                 try
                 {
