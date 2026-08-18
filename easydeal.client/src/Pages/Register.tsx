@@ -1,24 +1,20 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import GameBackground from "../Components/GameBackground";
-
+import ErrorPopup from "../Components/ErrorPopup"
 
 function Register() {
-    // state variables for email and passwords
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const navigate = useNavigate();
-
-    // state variable for error messages
     const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");  
 
     const handleLoginClick = () => {
         navigate("/login");
-    }
+    };
 
-
-    // handle change events for input fields
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         if (name === "email") setEmail(value);
@@ -26,10 +22,9 @@ function Register() {
         if (name === "confirmPassword") setConfirmPassword(value);
     };
 
-    // handle submit event for the form
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // validate email and passwords
+
         if (!email || !password || !confirmPassword) {
             setError("Please fill in all fields.");
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -37,10 +32,11 @@ function Register() {
         } else if (password !== confirmPassword) {
             setError("Passwords do not match.");
         } else {
-            // clear error message
             setError("");
-            // post data to the /register api
-            fetch("/register", {
+            setSuccess("");
+
+            // Only change: URL, body, and response handling
+            fetch("/api/auth/register", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -48,20 +44,21 @@ function Register() {
                 body: JSON.stringify({
                     email: email,
                     password: password,
+                    clientBaseUrl: window.location.origin,  // e.g. https://localhost:5173
                 }),
             })
-                //.then((response) => response.json())
-                .then((data) => {
-                    // handle success or error from the server
-                    console.log(data);
-                    if (data.ok)
-                        setError("Successful register.");
-                    else
-                        setError("Error registering.");
-
+                .then(async (response) => {
+                    const data = await response.json();
+                    console.log(data.errors)
+                    if (response.status === 409) {
+                        setError(data.message);  // "An account with this email already exists..."
+                    } else if (response.ok) {
+                        setSuccess("Registration successful! Please check your email to confirm your account. You may need to check your spam folder or search inbox for easydealv2@gmail.com");
+                    } else {
+                        setError(data.message ??  "Error registering.");
+                    }
                 })
                 .catch((error) => {
-                    // handle network error
                     console.error(error);
                     setError("Network Error registering.");
                 });
@@ -70,53 +67,66 @@ function Register() {
 
     return (
         <>
-        <GameBackground />
+            <GameBackground />
             <div className="containerbox" style={{ position: "relative", zIndex: 1 }}>
-            <h3>Register</h3>
+                <h3>Register</h3>
 
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="email">Email:</label>
-                </div><div>
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={email}
-                        onChange={handleChange}
-                    />
-                </div>
-                <div>
-                    <label htmlFor="password">Password:</label></div><div>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        value={password}
-                        onChange={handleChange}
-                    />
-                </div>
-                <div>
-                    <label htmlFor="confirmPassword">Confirm Password:</label></div><div>
-                    <input
-                        type="password"
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        value={confirmPassword}
-                        onChange={handleChange}
-                    />
-                </div>
-                <div>
-                    <button type="submit">Register</button>
+                {/* Hide form after successful registration */}
+                {!success ? (
+                    <form onSubmit={handleSubmit}>
+                        <div>
+                            <label htmlFor="email">Email:</label>
+                        </div>
+                        <div>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                value={email}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="password">Password:</label>
+                        </div>
+                        <div>
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                value={password}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="confirmPassword">Confirm Password:</label>
+                        </div>
+                        <div>
+                            <input
+                                type="password"
+                                id="confirmPassword"
+                                name="confirmPassword"
+                                value={confirmPassword}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        <div>
+                            <button type="submit">Register</button>
+                        </div>
+                        <div>
+                            <button type="button" onClick={handleLoginClick}>Go to Login</button>
+                        </div>
+                    </form>
+                ) : (
+                    // Shown after successful registration
+                    <div>
+                        <p style={{ color: "green" }}>{success}</p>
+                        <button onClick={handleLoginClick}>Go to Login</button>
+                    </div>
+                )}
 
-                </div>
-                <div>
-                    <button onClick={handleLoginClick}>Go to Login</button>
-                </div>
-            </form>
-
-            {error && <p className="error">{error}</p>}
-        </div>
+                {error && <ErrorPopup message={error} onClose={() => setError("")} />}
+            </div>
         </>
     );
 }

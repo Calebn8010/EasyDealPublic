@@ -1,6 +1,8 @@
+
 using EasyDeal.Server.Controllers;
 using EasyDeal.Server.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -37,7 +39,13 @@ namespace EasyDeal.Server.Data
 
             // Add in addtional api endpoints for React front end
             builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddSignInManager();
+
+
+
+            builder.Services.AddTransient<IEmailSender, EmailSender>();
+            builder.Services.AddTransient<IEmailSender<ApplicationUser>, IdentityEmailSender>();
 
 
             // Add services to the container.
@@ -45,7 +53,10 @@ namespace EasyDeal.Server.Data
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.CustomSchemaIds(type => type.FullName?.Replace("+", "."));
+            });
 
             var app = builder.Build();
 
